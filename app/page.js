@@ -1,0 +1,19 @@
+'use client'
+
+import { useEffect } from 'react'
+
+export default function Home() {
+  useEffect(() => {
+    // 重定向到 index.html
+    window.location.href = '/index.html'
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-[#0b0e11] flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+        <p className="text-gray-400">正在加载 HelloYan...</p>
+      </div>
+    </div>
+  )
+}

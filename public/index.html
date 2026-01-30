@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelloYan - 智能加密货币策略分析</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #0b0e11;
+      color: #eaecef;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(252, 213, 53, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(240, 185, 11, 0.03) 0%, transparent 50%);
+    }
+
+    .particles {
+      display: none;
+    }
+
+    .particle {
+      display: none;
+    }
+
+    @keyframes particleFloat {
+      display: none;
+    }
+
+    .glass-card {
+      background: #1e2329;
+      backdrop-filter: blur(20px);
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: #474d57;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(252, 213, 53, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fcd535 0%, #f0b90b 50%, #f99d1c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border: none;
+      color: #0b0e11;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 157, 28, 0.4);
+      background: linear-gradient(135deg, #fcd535 0%, #f99d1c 100%);
+    }
+
+    .ranking-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .ranking-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .ranking-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.5;
+      }
+    }
+
+    .status-online {
+      background: #0ecb81;
+      box-shadow: 0 0 10px rgba(14, 203, 129, 0.8);
+    }
+
+    .data-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .data-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 20px rgba(252, 213, 53, 0.15);
+    }
+
+    .strategy-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .strategy-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 30px rgba(252, 213, 53, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .table-row {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid #2b3139;
+    }
+
+    .table-row:hover {
+      background: rgba(252, 213, 53, 0.08);
+      border-bottom-color: #fcd535;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .loading-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 市场数据标签切换 */
+    .market-data-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .market-data-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .market-data-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .market-data-content {
+      display: none;
+    }
+
+    .market-data-content.active {
+      display: flex;
+    }
+
+    /* 市场概览子标签切换 */
+    .overview-sub-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .overview-sub-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .overview-sub-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .overview-sub-content {
+      display: none;
+    }
+
+    .overview-sub-content.active {
+      display: block;
+    }
+
+    /* 策略标签切换 */
+    .strategy-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .strategy-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .strategy-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .strategy-content {
+      display: none;
+    }
+
+    .strategy-content.active {
+      display: block;
+    }
+
+    /* 市场异动监控标签切换 */
+    .market-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .market-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .market-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .market-content {
+      display: none;
+    }
+
+    .market-content.active {
+      display: block;
+    }
+
+    /* 市场概览卡片 */
+    .overview-card {
+      background: linear-gradient(135deg, rgba(30, 35, 41, 0.9), rgba(43, 49, 57, 0.9));
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .overview-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 25px rgba(252, 213, 53, 0.1);
+    }
+
+    /* 市场异动卡片 */
+    .anomaly-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+      min-height: 140px;
+    position: relative;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .anomaly-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 25px rgba(252, 213, 53, 0.1);
+    }
+
+    /* 新闻分类按钮 */
+    .news-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .news-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .news-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    /* 新闻轮播 */
+    .news-ticker {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .news-ticker-item {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding-right: 30px;
+      animation: ticker 20s linear infinite;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Masonry 布局 */
+    .masonry {
+      column-count: 2;
+      column-gap: 12px;
+    }
+
+    .masonry > * {
+      break-inside: avoid;
+      margin-bottom: 12px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e2329;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #474d57;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5e6673;
+    }
+
+    @media (max-width: 1280px) {
+      .glass-card {
+        border-radius: 10px;
+      }
+      .masonry {
+        column-count: 1;
+      }
+    }
+
+    /* 弹窗表格样式 */
+    .modal-data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+
+    .modal-data-table thead {
+      position: sticky;
+      top: 0;
+      background: #1e2329;
+      z-index: 10;
+    }
+
+    .modal-data-table th {
+      padding: 12px 8px;
+      text-align: left;
+      font-weight: 600;
+      color: #848e9c;
+      border-bottom: 1px solid #2b3139;
+      white-space: nowrap;
+    }
+
+    .modal-data-table th:nth-child(1) { width: 15%; }  /* 排名/交易对/币种 */
+    .modal-data-table th:nth-child(2) { width: 12%; }  /* 方向/数量/当前/价值 */
+    .modal-data-table th:nth-child(3) { width: 13%; }  /* 金额/价值/预测/OI */
+    .modal-data-table th:nth-child(4) { width: 13%; }  /* 价格/类型/24h/变化 */
+    .modal-data-table th:nth-child(5) { width: 17%; }  /* 时间/时间/7d/趋势 */
+    .modal-data-table th:nth-child(6) { width: 15%; }  /* 交易所 */
+    .modal-data-table th:nth-child(7) { width: 15%; }  /* 额外列 */
+
+    .modal-data-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #2b3139;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .modal-data-table tbody tr:hover {
+      background: rgba(252, 213, 53, 0.05);
+    }
+
+    .modal-data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 清算图输入框样式 */
+    #liquidationCoinInput:focus {
+      border-color: #fcd535;
+      box-shadow: 0 0 0 2px rgba(252, 213, 53, 0.1);
+    }
+
+    /* 杠杆按钮样式 */
+    .leverage-btn {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      transition: all 0.3s ease;
+    }
+
+    .leverage-btn:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .leverage-btn.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+      font-weight: 600;
+    }
+
+    /* 10x 杠杆颜色 */
+    .leverage-btn[data-leverage="10x"].active {
+      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    /* 25x 杠杆颜色 */
+    .leverage-btn[data-leverage="25x"].active {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    /* 50x 杠杆颜色 */
+    .leverage-btn[data-leverage="50x"].active {
+      background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    /* 100x 杠杆颜色 */
+    .leverage-btn[data-leverage="100x"].active {
+      background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    /* 所有 杠杆颜色 */
+    .leverage-btn[data-leverage="all"].active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="min-h-screen p-4 md:p-6">
+    <!-- 头部 -->
+    <header class="mb-6 fade-in">
+      <div class="glass-card p-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg ring-2 ring-slate-700/50">
+              <img id="siteLogo" src="logo.png" alt="HelloYan Logo" class="w-full h-full object-cover"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="hidden w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg">
+                <span class="text-2xl font-bold text-black">HY</span>
+              </div>
+            </div>
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold gradient-text">HelloYan</h1>
+              <p class="text-sm text-slate-400">智能加密货币策略分析系统</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <a href="https://x.com/Mrwu1177" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition-all group">
+              <svg class="w-5 h-5 text-slate-400 group-hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span class="text-sm text-slate-400 group-hover:text-yellow-400 transition-colors">@Mrwu1177</span>
+            </a>
+            <div class="flex items-center gap-2">
+              <div class="status-dot status-online" id="systemStatus"></div>
+              <span class="text-sm text-slate-300">系统运行中</span>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-slate-400">最后更新</p>
+              <p class="text-sm font-semibold text-white" id="lastUpdate">--:--:--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 市场异动监控（标题板块下方） -->
+    <div class="glass-card p-6 fade-in mb-6">
+      <div class="flex items-center gap-3 mb-4">
+        <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <h2 class="text-xl font-bold text-white">市场异动监控</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- 爆仓监控 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'liquidation')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            爆仓监控
+          </h3>
+          <div id="liquidationContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 大单异动 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'whale')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            大单异动
+          </h3>
+          <div id="whaleContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 资金费率 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'funding')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            资金费率
+          </h3>
+          <div id="fundingContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 未平仓合约 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'oi')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            未平仓合约
+          </h3>
+          <div id="oiContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 订单簿深度 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'orderbook')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            订单簿深度
+          </h3>
+          <div id="orderbookContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 价格波动率 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'volatility')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            价格波动率
+          </h3>
+          <div id="volatilityContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 24h高低点 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'highlow')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            24h高低点
+          </h3>
+          <div id="highlowContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 成交量分析 -->
+        <div class="anomaly-card anomaly-card-clickable" onclick="showModal(this, 'volume')">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+            成交量分析
+          </h3>
+          <div id="volumeContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 四列布局 -->
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
+
+      <!-- 左列：新闻追踪 -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.1s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">新闻追踪</h2>
+
+        <!-- 新闻分类按钮 -->
+        <div class="flex items-center gap-2 mb-4">
+          <button onclick="switchNewsType('latest')" id="news-btn-latest" class="news-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 border border-yellow-500/30">最新</button>
+          <button onclick="switchNewsType('hot')" id="news-btn-hot" class="news-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-700 text-slate-300 hover:bg-slate-600">热门</button>
+          <button onclick="switchNewsType('kol')" id="news-btn-kol" class="news-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-700 text-slate-300 hover:bg-slate-600">KOL</button>
+        </div>
+
+        <div id="newsLoading" class="text-center py-4 flex-1">
+          <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+          <p class="text-sm text-slate-400">正在加载新闻...</p>
+        </div>
+
+        <div id="newsEmpty" class="hidden text-center py-4 text-slate-500">
+          暂无新闻数据
+        </div>
+
+        <div id="newsContent" class="hidden space-y-3 overflow-y-auto flex-1 pr-1">
+        </div>
+      </div>
+
+      <!-- 中列：策略分析 -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.2s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">策略分析</h2>
+
+        <!-- 策略标签切换 -->
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <button onclick="switchStrategyTab('signal')" id="strategy-tab-signal" class="strategy-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">异动信号</button>
+          <button onclick="switchStrategyTab('multicoin')" id="strategy-tab-multicoin" class="strategy-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">多币种策略</button>
+          <button onclick="switchStrategyTab('bollinger')" id="strategy-tab-bollinger" class="strategy-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">布林带分析</button>
+        </div>
+
+        <!-- 异动信号内容 -->
+        <div id="strategy-signal" class="strategy-content active flex-1 overflow-y-auto">
+          <div id="signalLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载信号...</p>
+          </div>
+          <div id="signalContent" class="hidden space-y-3"></div>
+        </div>
+
+        <!-- 多币种策略内容 -->
+        <div id="strategy-multicoin" class="strategy-content hidden flex-1 overflow-y-auto">
+          <div id="multicoinLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载策略...</p>
+          </div>
+          <div id="multicoinContent" class="hidden space-y-3"></div>
+        </div>
+
+        <!-- 布林带分析内容 -->
+        <div id="strategy-bollinger" class="strategy-content hidden flex-1 overflow-y-auto">
+          <div id="bollingerLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载布林带分析...</p>
+          </div>
+          <div id="bollingerContent" class="hidden space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- 第三列：市场概览 -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.3s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">市场概览</h2>
+
+        <!-- 市场概览标签切换 -->
+        <div class="flex items-center gap-2 mb-4">
+          <button onclick="switchOverviewTab('market')" id="overview-tab-market" class="overview-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">全球市场</button>
+          <button onclick="switchOverviewTab('feargreed')" id="overview-tab-feargreed" class="overview-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">恐惧贪婪</button>
+        </div>
+
+        <!-- 全球市场内容 -->
+        <div id="overview-market" class="overview-sub-content active flex-1 overflow-y-auto">
+          <div id="marketOverviewLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载市场概览...</p>
+          </div>
+          <div id="marketOverviewContent" class="hidden space-y-3"></div>
+        </div>
+
+        <!-- 恐惧贪婪指数内容 -->
+        <div id="overview-feargreed" class="overview-sub-content hidden flex-1 overflow-y-auto">
+          <div id="fearGreedLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载恐惧贪婪指数...</p>
+          </div>
+          <div id="fearGreedContent" class="hidden space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- 第四列：排行榜 -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.4s; max-height: 700px;">
+        <h2 class="text-xl font-bold text-white mb-4">排行榜</h2>
+
+        <!-- 排行榜标签切换 -->
+        <div class="flex items-center gap-2 mb-4 flex-shrink-0">
+          <button onclick="switchRankingType('top')" id="ranking-tab-top" class="ranking-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">涨幅榜</button>
+          <button onclick="switchRankingType('bottom')" id="ranking-tab-bottom" class="ranking-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">跌幅榜</button>
+          <button onclick="switchRankingType('active')" id="ranking-tab-active" class="ranking-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">活跃榜</button>
+        </div>
+
+        <!-- 排行榜内容 -->
+        <div id="market-data-ranking" class="market-data-content active flex flex-col min-h-0 flex-1">
+          <div id="rankingLoading" class="text-center py-4 flex-shrink-0">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载排行榜...</p>
+          </div>
+
+          <div id="rankingContent" class="hidden overflow-y-auto flex-1 pr-1 min-h-0">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-slate-900/95 z-10">
+                <tr class="text-left text-xs text-slate-400 border-b border-slate-700">
+                  <th class="pb-2 font-medium w-12">排名</th>
+                  <th class="pb-2 font-medium">币种</th>
+                  <th class="pb-2 font-medium">价格</th>
+                  <th class="pb-2 font-medium">24h涨跌</th>
+                  <th class="pb-2 font-medium">24h交易量</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTable" class="text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 爆仓清算图 -->
+    <div class="glass-card p-6 fade-in mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3 flex-1">
+          <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+          <h2 class="text-xl font-bold text-white">爆仓清算图</h2>
+
+          <!-- 快速选择币种 -->
+          <div class="flex items-center gap-2 ml-4">
+            <button
+              onclick="quickLoadCoin('BTC')"
+              class="coin-quick-btn text-xs px-3 py-1.5 rounded-lg font-medium transition-all bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-500/30"
+              data-coin="BTC"
+            >
+              BTC
+            </button>
+            <button
+              onclick="quickLoadCoin('ETH')"
+              class="coin-quick-btn text-xs px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600"
+              data-coin="ETH"
+            >
+              ETH
+            </button>
+          </div>
+
+          <input
+            type="text"
+            id="liquidationCoinInput"
+            placeholder="输入其他币种"
+            value="BTC"
+            class="ml-2 px-3 py-1.5 text-xs bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 w-32 transition-all"
+          />
+          <button
+            onclick="loadCustomLiquidationCoin()"
+            class="text-xs px-4 py-1.5 rounded-lg font-medium transition-all bg-gradient-to-r from-yellow-500 to-amber-500 text-black hover:from-yellow-400 hover:to-amber-400 font-semibold"
+          >
+            加载
+          </button>
+        </div>
+      </div>
+
+      <!-- 杠杆切换按钮 -->
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <button
+          id="leverage-all"
+          onclick="switchLeverage('all')"
+          class="leverage-btn text-xs px-4 py-2 rounded-lg font-medium transition-all"
+          data-leverage="all"
+        >
+          所有
+        </button>
+        <button
+          id="leverage-10x"
+          onclick="switchLeverage('10x')"
+          class="leverage-btn text-xs px-4 py-2 rounded-lg font-medium transition-all"
+          data-leverage="10x"
+        >
+          10x
+        </button>
+        <button
+          id="leverage-25x"
+          onclick="switchLeverage('25x')"
+          class="leverage-btn text-xs px-4 py-2 rounded-lg font-medium transition-all"
+          data-leverage="25x"
+        >
+          25x
+        </button>
+        <button
+          id="leverage-50x"
+          onclick="switchLeverage('50x')"
+          class="leverage-btn text-xs px-4 py-2 rounded-lg font-medium transition-all"
+          data-leverage="50x"
+        >
+          50x
+        </button>
+        <button
+          id="leverage-100x"
+          onclick="switchLeverage('100x')"
+          class="leverage-btn text-xs px-4 py-2 rounded-lg font-medium transition-all"
+          data-leverage="100x"
+        >
+          100x
+        </button>
+      </div>
+
+      <!-- 清算图容器 -->
+      <div id="liquidationChartContainer" class="relative h-[400px] bg-slate-900/50 rounded-lg overflow-hidden border border-slate-700/50">
+        <canvas id="liquidationChart" class="w-full h-full"></canvas>
+
+        <!-- 悬浮提示 -->
+        <div id="liquidationTooltip" class="absolute hidden bg-slate-900/95 backdrop-blur-sm border border-slate-700 rounded-lg p-3 pointer-events-none z-20 shadow-2xl" style="min-width: 180px;">
+          <div class="flex items-center justify-between mb-2">
+            <span id="tooltipPrice" class="text-sm font-bold text-white">$82,382</span>
+            <span id="tooltipPercent" class="text-xs text-slate-400">0.00%</span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-green-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                多单持仓
+              </span>
+              <span id="tooltipLongValue" class="text-white font-medium">125.5M</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-red-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                空单持仓
+              </span>
+              <span id="tooltipShortValue" class="text-white font-medium">87.3M</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 价格区间选择器 -->
+      <div class="mt-4 px-2">
+        <div class="relative h-10 bg-slate-800/50 rounded-lg border border-slate-700">
+          <!-- 价格刻度背景 -->
+          <div class="absolute inset-0 flex justify-between px-4 items-center text-[10px] text-slate-500 font-mono">
+            <span id="rangeLeftPrice">80,000</span>
+            <span id="rangeRightPrice">94,000</span>
+          </div>
+
+          <!-- 范围高亮区域 -->
+          <div
+            id="rangeHighlight"
+            class="absolute h-full bg-yellow-500/10 border-l-2 border-r-2 border-yellow-500/50 rounded"
+            style="left: 0%; width: 100%;"
+          ></div>
+
+          <!-- 左滑块 -->
+          <div
+            id="rangeLeftHandle"
+            class="absolute top-0 bottom-0 w-6 cursor-ew-resize z-10 flex items-center justify-center hover:bg-yellow-500/20 transition-all"
+            style="left: 0%;"
+          >
+            <div class="w-1 h-8 bg-yellow-500 rounded-full"></div>
+          </div>
+
+          <!-- 右滑块 -->
+          <div
+            id="rangeRightHandle"
+            class="absolute top-0 bottom-0 w-6 cursor-ew-resize z-10 flex items-center justify-center hover:bg-yellow-500/20 transition-all"
+            style="left: 100%;"
+          >
+            <div class="w-1 h-8 bg-yellow-500 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部信息栏 -->
+      <div class="flex items-center justify-between mt-4 px-2">
+        <div class="flex items-center gap-6 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-sm bg-gradient-to-t from-green-500 to-green-400"></span>
+            <span class="text-slate-400">多单持仓</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-sm bg-gradient-to-t from-red-500 to-red-400"></span>
+            <span class="text-slate-400">空单持仓</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 text-xs">
+          <span class="text-slate-500">当前价格:</span>
+          <span id="liquidationCurrentPrice" class="text-yellow-400 font-mono font-bold">82,382</span>
+          <span class="text-slate-500">|</span>
+          <span class="text-slate-500">更新时间:</span>
+          <span id="liquidationUpdateTime" class="text-slate-400 font-mono">--:--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="text-center py-4 text-slate-500 text-sm">
+      <p>HelloYan - 智能加密货币策略分析系统 | 数据仅供参考，不构成投资建议</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // ==================== 全局变量和配置 ====================
+    let currentNewsType = 'latest';
+    let currentRankingType = 'top';
+    let currentStrategyTab = 'signal';
+    let currentLiquidationCoin = 'BTC';
+    let currentLeverage = '25x';  // 默认选择25x杠杆
+    let liquidationData = {};
+
+    // 价格区间配置
+    let priceRange = {
+      min: 80000,
+      max: 94000,
+      current: 82382
+    };
+
+    // 杠杆颜色配置
+    const leverageColors = {
+      '10x': { primary: '#3b82f6', gradient: ['#3b82f6', '#60a5fa'] },
+      '25x': { primary: '#8b5cf6', gradient: ['#8b5cf6', '#a78bfa'] },
+      '50x': { primary: '#f59e0b', gradient: ['#f59e0b', '#fbbf24'] },
+      '100x': { primary: '#ef4444', gradient: ['#ef4444', '#f87171'] }
+    };
+
+    // ==================== 初始化 ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      initParticles();
+      loadAllData();
+      setInterval(loadAllData, 30000); // 每30秒刷新一次数据
+      updateLastUpdateTime();
+      setInterval(updateLastUpdateTime, 1000);
+
+      // 初始化价格区间选择器
+      setTimeout(() => {
+        initPriceRangeSlider();
+      }, 1000);
+    });
+
+    // ==================== 粒子背景 ====================
+    function initParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // ==================== 更新时间 ====================
+    function updateLastUpdateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+      const timeEl = document.getElementById('lastUpdate');
+      if (timeEl) {
+        timeEl.textContent = timeStr;
+      }
+    }
+
+    // ==================== 加载所有数据 ====================
+    async function loadAllData() {
+      try {
+        await Promise.all([
+          loadNewsData(currentNewsType),
+          loadRankingData(),
+          loadMarketOverview(),
+          loadStrategySignal(),
+          loadStrategyMulticoin(),
+          loadStrategyBollinger(),
+          loadMarketAnomalyData(),
+          loadLiquidationMap()
+        ]);
+      } catch (error) {
+        console.error('加载数据失败:', error);
+      }
+    }
+
+    // ==================== 通用 API 调用（带降级策略）====================
+    async function fetchWithFallback(url, fallbackUrl, timeout = 15000) {
+      const startTime = Date.now();
+      let dataSource = 'primary';
+      let status = 'success';
+      let errorMessage = '';
+
+      try {
+        // 尝试主 API
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        const response = await fetch(url, {
+          signal: controller.signal,
+          cache: 'no-cache' // 禁用缓存，确保获取最新数据
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          // 检查数据是否有效（不是空数组、null、undefined）
+          if (data && (Array.isArray(data) ? data.length > 0 : true)) {
+            console.log(`✅ API 成功: ${url}`);
+
+            // 记录成功日志
+            await logApiCall('success', url, dataSource, Date.now() - startTime);
+
+            return data;
+          }
+          console.log(`⚠️ API 返回空数据: ${url}`);
+          errorMessage = 'API 返回空数据';
+        }
+
+        throw new Error('主 API 返回无效数据');
+      } catch (error) {
+        console.log(`❌ 主 API 失败 (${url})，尝试备用 API:`, error.message);
+        dataSource = 'fallback';
+        errorMessage = error.message;
+
+        try {
+          // 尝试备用 API
+          const response = await fetch(fallbackUrl, {
+            cache: 'no-cache'
+          });
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ 使用备用数据');
+
+            // 记录备用数据日志
+            await logApiCall('fallback', fallbackUrl, dataSource, Date.now() - startTime, errorMessage);
+
+            return data;
+          }
+        } catch (fallbackError) {
+          console.error('❌ 备用 API 也失败:', fallbackError.message);
+          errorMessage = `${error.message} | ${fallbackError.message}`;
+        }
+
+        // 记录失败日志
+        await logApiCall('error', url, dataSource, Date.now() - startTime, errorMessage);
+
+        // 返回空数组
+        return [];
+      }
+    }
+
+    // ==================== API 日志记录 ====================
+    async function logApiCall(type, url, source, duration, error = '') {
+      try {
+        await fetch('/api/logs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'api_call',
+            message: `${type.toUpperCase()}: ${url}`,
+            metadata: {
+              url,
+              source,
+              duration,
+              error,
+              type
+            }
+          })
+        });
+      } catch (logError) {
+        // 日志记录失败不影响主流程
+        console.error('Failed to log API call:', logError);
+      }
+    }
+
+    // ==================== 新闻数据 ====================
+    async function loadNewsData(type) {
+      const loadingEl = document.getElementById('newsLoading');
+      const contentEl = document.getElementById('newsContent');
+      const emptyEl = document.getElementById('newsEmpty');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=10',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+
+        const newsData = generateMockNews(type, data);
+
+        loadingEl.classList.add('hidden');
+
+        if (newsData.length === 0) {
+          emptyEl.classList.remove('hidden');
+        } else {
+          contentEl.innerHTML = newsData.map((news, index) => `
+            <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 hover:border-orange-500/30 transition-all cursor-pointer" onclick="showNewsDetail(${index})">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1">
+                  <p class="text-sm text-white font-medium mb-1">${news.title}</p>
+                  <p class="text-xs text-slate-400 line-clamp-2">${news.summary}</p>
+                </div>
+                <span class="text-xs text-orange-400 whitespace-nowrap">${news.time}</span>
+              </div>
+            </div>
+          `).join('');
+          contentEl.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('加载新闻失败:', error);
+        loadingEl.classList.add('hidden');
+        emptyEl.textContent = '加载失败，请稍后重试';
+        emptyEl.classList.remove('hidden');
+      }
+    }
+
+    // 切换新闻类型
+    function switchNewsType(type) {
+      currentNewsType = type;
+
+      // 更新按钮状态
+      document.querySelectorAll('.news-tab').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('bg-slate-700', 'text-slate-300');
+        btn.classList.remove('bg-gradient-to-r', 'from-yellow-500/20', 'to-amber-500/20', 'text-yellow-300', 'border', 'border-yellow-500/30');
+      });
+
+      const activeBtn = document.getElementById(`news-btn-${type}`);
+      activeBtn.classList.add('active');
+      activeBtn.classList.remove('bg-slate-700', 'text-slate-300');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-yellow-500/20', 'to-amber-500/20', 'text-yellow-300', 'border', 'border-yellow-500/30');
+
+      // 重新加载新闻
+      loadNewsData(type);
+    }
+
+    // 显示新闻详情弹窗
+    function showNewsDetail(index) {
+      const newsData = generateMockNews(currentNewsType, []);
+      const news = newsData[index];
+
+      if (!news) return;
+
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalContent = document.getElementById('modalContent');
+
+      modalTitle.textContent = '新闻详情';
+      modalContent.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-lg font-bold text-white mb-2">${news.title}</h3>
+            <p class="text-xs text-orange-400 mb-4">${news.time}</p>
+          </div>
+          <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+            <p class="text-sm text-slate-300 leading-relaxed">${news.fullSummary || news.summary}</p>
+          </div>
+          <div class="text-xs text-slate-500 mt-4">
+            来源：HelloYan 市场分析中心
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    // 关闭弹窗
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      modal.classList.remove('active');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+
+    // ==================== 清算图功能 ====================
+
+    // 快速加载币种
+    function quickLoadCoin(coin) {
+      const input = document.getElementById('liquidationCoinInput');
+      input.value = coin;
+
+      // 更新按钮样式
+      document.querySelectorAll('.coin-quick-btn').forEach(btn => {
+        if (btn.dataset.coin === coin) {
+          btn.classList.remove('bg-slate-700', 'text-slate-300', 'border-slate-600');
+          btn.classList.add('bg-yellow-500/20', 'text-yellow-300', 'border-yellow-500/30');
+        } else {
+          btn.classList.remove('bg-yellow-500/20', 'text-yellow-300', 'border-yellow-500/30');
+          btn.classList.add('bg-slate-700', 'text-slate-300', 'border-slate-600');
+        }
+      });
+
+      currentLiquidationCoin = coin;
+      loadLiquidationMap();
+    }
+
+    function loadCustomLiquidationCoin() {
+      const input = document.getElementById('liquidationCoinInput');
+      const coin = input.value.trim().toUpperCase();
+
+      if (!coin) {
+        alert('请输入交易对代码');
+        return;
+      }
+
+      currentLiquidationCoin = coin;
+
+      // 重新加载清算图
+      loadLiquidationMap();
+    }
+
+    async function loadLiquidationMap() {
+      try {
+        console.log(`🔄 开始加载清算数据: ${currentLiquidationCoin}`);
+
+        // 生成清算数据（从Binance获取真实价格）
+        liquidationData = await generateLiquidationData(currentLiquidationCoin);
+
+        // 绘制清算图
+        drawLiquidationChart();
+
+        // 更新当前价格
+        updateCurrentPrice();
+
+        // 初始化杠杆按钮
+        initLeverageButtons();
+
+        console.log(`✅ 清算图加载完成`);
+      } catch (error) {
+        console.error('加载清算图失败:', error);
+        // 显示错误提示
+        const errorContainer = document.getElementById('liquidationChartContainer');
+        if (errorContainer) {
+          errorContainer.innerHTML = `
+            <div class="flex items-center justify-center h-full text-slate-400">
+              <div class="text-center">
+                <svg class="w-12 h-12 mx-auto mb-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm">加载清算数据失败</p>
+                <p class="text-xs mt-1">请检查网络连接或稍后重试</p>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function switchLeverage(leverage) {
+      currentLeverage = leverage;
+
+      // 更新按钮状态
+      document.querySelectorAll('.leverage-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-leverage') === leverage) {
+          btn.classList.add('active');
+        }
+      });
+
+      // 重新绘制图表
+      if (leverage === 'all') {
+        // 聚合所有杠杆的数据
+        if (liquidationData.leverageData) {
+          drawLiquidationChart();
+        }
+      } else if (liquidationData.leverageData && liquidationData.leverageData[leverage]) {
+        drawLiquidationChart();
+      }
+    }
+
+    function initLeverageButtons() {
+      // 设置默认激活的杠杆按钮
+      document.querySelectorAll('.leverage-btn').forEach(btn => {
+        if (btn.getAttribute('data-leverage') === currentLeverage) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    function initPriceRangeSlider() {
+      const rangeLeftHandle = document.getElementById('rangeLeftHandle');
+      const rangeRightHandle = document.getElementById('rangeRightHandle');
+      const rangeHighlight = document.getElementById('rangeHighlight');
+      const rangeSlider = rangeLeftHandle.parentElement;
+
+      if (!rangeLeftHandle || !rangeRightHandle || !rangeHighlight || !rangeSlider) {
+        console.warn('价格区间选择器元素不存在');
+        return;
+      }
+
+      let isDragging = false;
+      let currentHandle = null;
+
+      const updateRange = () => {
+        const leftPercent = parseFloat(rangeLeftHandle.style.left);
+        const rightPercent = parseFloat(rangeRightHandle.style.left);
+
+        // 确保左滑块不大于右滑块
+        const actualLeftPercent = Math.min(leftPercent, rightPercent - 10);
+        const actualRightPercent = Math.max(rightPercent, leftPercent + 10);
+
+        rangeLeftHandle.style.left = actualLeftPercent + '%';
+        rangeRightHandle.style.left = actualRightPercent + '%';
+        rangeHighlight.style.left = actualLeftPercent + '%';
+        rangeHighlight.style.width = (actualRightPercent - actualLeftPercent) + '%';
+
+        // 更新价格显示
+        const leftPrice = priceRange.min + (priceRange.max - priceRange.min) * (actualLeftPercent / 100);
+        const rightPrice = priceRange.min + (priceRange.max - priceRange.min) * (actualRightPercent / 100);
+
+        const rangeLeftPrice = document.getElementById('rangeLeftPrice');
+        const rangeRightPrice = document.getElementById('rangeRightPrice');
+
+        if (rangeLeftPrice) {
+          rangeLeftPrice.textContent = (leftPrice / 1000).toFixed(0) + 'K';
+        }
+        if (rangeRightPrice) {
+          rangeRightPrice.textContent = (rightPrice / 1000).toFixed(0) + 'K';
+        }
+
+        // 更新全局价格范围（用于放大显示）
+        priceRange.displayMin = leftPrice;
+        priceRange.displayMax = rightPrice;
+
+        // 重新绘制图表以显示选定区间
+        drawLiquidationChart();
+      };
+
+      const handleMouseDown = (e, handle) => {
+        isDragging = true;
+        currentHandle = handle;
+        e.preventDefault();
+      };
+
+      const handleMouseMove = (e) => {
+        if (!isDragging || !currentHandle) return;
+
+        const rect = rangeSlider.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+        currentHandle.style.left = percent + '%';
+        updateRange();
+      };
+
+      const handleMouseUp = () => {
+        isDragging = false;
+        currentHandle = null;
+      };
+
+      // 左滑块事件
+      rangeLeftHandle.addEventListener('mousedown', (e) => handleMouseDown(e, rangeLeftHandle));
+      rangeRightHandle.addEventListener('mousedown', (e) => handleMouseDown(e, rangeRightHandle));
+
+      // 全局鼠标移动和释放事件
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+
+      // 触摸事件支持
+      rangeLeftHandle.addEventListener('touchstart', (e) => handleMouseDown(e, rangeLeftHandle));
+      rangeRightHandle.addEventListener('touchstart', (e) => handleMouseDown(e, rangeRightHandle));
+      document.addEventListener('touchmove', handleMouseMove);
+      document.addEventListener('touchend', handleMouseUp);
+
+      // 初始化范围高亮
+      rangeHighlight.style.left = '0%';
+      rangeHighlight.style.width = '100%';
+    }
+
+    // ==================== 清算估算算法 ====================
+
+    /**
+     * 获取Binance实时价格
+     */
+    async function getBinancePrice(symbol) {
+      try {
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+        const data = await response.json();
+        return parseFloat(data.price);
+      } catch (error) {
+        console.error('获取Binance价格失败:', error);
+        // 返回默认价格
+        const priceMap = {
+          'BTC': 82382,
+          'ETH': 3245.80,
+          'SOL': 218.75,
+          'BNB': 615.20,
+          'XRP': 2.15,
+          'ADA': 0.52,
+          'DOGE': 0.0876,
+          'AVAX': 35.20,
+          'LINK': 14.85,
+          'DOT': 6.95,
+          'MATIC': 0.78
+        };
+        return priceMap[symbol] || 82382;
+      }
+    }
+
+    /**
+     * 估算清算分布数据
+     * 基于价格波动和杠杆倍数计算每个价格点的清算强度
+     */
+    function calculateLiquidationDistribution(basePrice, prices, marketTrend = 'neutral') {
+      const leverageConfig = {
+        '10x': { volatility: 0.8, baseOI: 0.3, sensitivity: 0.5 },
+        '25x': { volatility: 1.0, baseOI: 0.4, sensitivity: 0.7 },
+        '50x': { volatility: 1.3, baseOI: 0.5, sensitivity: 0.9 },
+        '100x': { volatility: 1.6, baseOI: 0.6, sensitivity: 1.1 }
+      };
+
+      const distribution = {};
+      const leverages = ['10x', '25x', '50x', '100x'];
+
+      // 计算价格波动率
+      const priceVolatility = calculatePriceVolatility(prices, basePrice);
+
+      leverages.forEach(leverage => {
+        const config = leverageConfig[leverage];
+        distribution[leverage] = {};
+
+        prices.forEach(price => {
+          const priceDiff = price - basePrice;
+          const percentDiff = priceDiff / basePrice;
+
+          // 根据市场趋势调整清算分布
+          let trendFactor = 1;
+          if (marketTrend === 'bullish' && priceDiff > 0) {
+            trendFactor = 1.2;  // 牛市：上方清算更多
+          } else if (marketTrend === 'bearish' && priceDiff < 0) {
+            trendFactor = 1.2;  // 熊市：下方清算更多
+          }
+
+          // 计算多单清算（价格上涨时爆仓）
+          // 多单在价格下跌时爆仓，所以关注价格低于当前价格的部分
+          let longLiquidation = 0;
+          if (priceDiff < 0) {
+            const liquidationProb = Math.exp(-Math.abs(percentDiff) * config.sensitivity * priceVolatility);
+            longLiquidation = config.baseOI * 100 * liquidationProb * config.volatility * trendFactor;
+          }
+
+          // 计算空单清算（价格下跌时爆仓）
+          // 空单在价格上涨时爆仓，所以关注价格高于当前价格的部分
+          let shortLiquidation = 0;
+          if (priceDiff > 0) {
+            const liquidationProb = Math.exp(-Math.abs(percentDiff) * config.sensitivity * priceVolatility);
+            shortLiquidation = config.baseOI * 100 * liquidationProb * config.volatility * trendFactor;
+          }
+
+          // 添加随机波动，使图表更真实
+          const noise = (Math.random() - 0.5) * 20;
+          longLiquidation = Math.max(0, longLiquidation + noise);
+          shortLiquidation = Math.max(0, shortLiquidation + noise);
+
+          // 按CoinGlass格式存储：[清算价格, 清算金额, 杠杆倍数]
+          if (!distribution[leverage][price]) {
+            distribution[leverage][price] = [];
+          }
+
+          // 只添加非零的清算数据
+          if (longLiquidation > 0 || shortLiquidation > 0) {
+            const leverageMultiplier = parseInt(leverage);
+            distribution[leverage][price].push([
+              price,
+              longLiquidation + shortLiquidation,  // 清算总金额
+              leverageMultiplier,
+              null
+            ]);
+          }
+        });
+      });
+
+      return distribution;
+    }
+
+    /**
+     * 计算价格波动率
+     */
+    function calculatePriceVolatility(prices, basePrice) {
+      if (prices.length < 2) return 1;
+
+      let totalChange = 0;
+      for (let i = 1; i < prices.length; i++) {
+        totalChange += Math.abs(prices[i] - prices[i - 1]) / prices[i - 1];
+      }
+
+      const avgChange = totalChange / (prices.length - 1);
+      return Math.max(0.5, Math.min(2.0, avgChange * 50));  // 限制在0.5-2.0之间
+    }
+
+    /**
+     * 生成清算图数据（按CoinGlass格式）
+     */
+    async function generateLiquidationData(coin) {
+      try {
+        // 从Binance获取真实价格
+        const basePrice = await getBinancePrice(coin);
+
+        // 生成价格序列（基于价格波动范围）
+        const priceRangePercent = 0.15;  // ±15%的价格范围
+        const minPrice = basePrice * (1 - priceRangePercent);
+        const maxPrice = basePrice * (1 + priceRangePercent);
+        const numPoints = 80;  // 价格点数量
+
+        const prices = [];
+        for (let i = 0; i < numPoints; i++) {
+          const price = minPrice + (maxPrice - minPrice) * (i / (numPoints - 1));
+          prices.push(Math.round(price * 100) / 100);  // 保留2位小数
+        }
+
+        // 估算市场趋势（基于最近的模拟数据）
+        // 在实际应用中，这里应该使用真实的市场数据
+        const marketTrend = Math.random() > 0.5 ? 'bullish' : 'bearish';
+
+        // 计算清算分布
+        const liquidationDistribution = calculateLiquidationDistribution(basePrice, prices, marketTrend);
+
+        // 转换为绘制图表需要的格式
+        const leverageData = {};
+        leverages.forEach(leverage => {
+          leverageData[leverage] = {
+            longPositions: [],
+            shortPositions: [],
+            maxOI: 0
+          };
+        });
+
+        // 遍历每个价格点，为每个杠杆分配多空持仓
+        prices.forEach(price => {
+          const priceDiff = price - basePrice;
+          const percentDiff = priceDiff / basePrice;
+
+          leverages.forEach(leverage => {
+            const leveragePoints = liquidationDistribution[leverage][price] || [];
+            const totalLiquidation = leveragePoints.reduce((sum, point) => sum + point[1], 0);
+
+            // 根据价格方向分配到多空持仓
+            // 价格低于当前价格 → 空单持仓（价格下跌时空头盈利，多头爆仓）
+            // 价格高于当前价格 → 多单持仓（价格上涨时多头盈利，空头爆仓）
+            let shortOI = 0;  // 空单持仓
+            let longOI = 0;   // 多单持仓
+
+            if (priceDiff < 0) {
+              // 价格低于当前价格：主要是空单持仓
+              shortOI = totalLiquidation * (1 + Math.abs(percentDiff) * 2);
+            } else {
+              // 价格高于当前价格：主要是多单持仓
+              longOI = totalLiquidation * (1 + Math.abs(percentDiff) * 2);
+            }
+
+            leverageData[leverage].longPositions.push(longOI);
+            leverageData[leverage].shortPositions.push(shortOI);
+          });
+        });
+
+        // 计算每个杠杆的最大OI
+        Object.keys(leverageData).forEach(leverage => {
+          const maxLong = Math.max(...leverageData[leverage].longPositions);
+          const maxShort = Math.max(...leverageData[leverage].shortPositions);
+          leverageData[leverage].maxOI = Math.max(maxLong, maxShort);
+        });
+
+        // 更新全局价格范围
+        priceRange.min = minPrice;
+        priceRange.max = maxPrice;
+        priceRange.current = basePrice;
+
+        console.log(`✅ 清算数据生成完成: ${coin}, 当前价格: $${basePrice.toLocaleString()}`);
+
+        return {
+          prices,
+          leverageData,
+          liquidationDistribution,  // 保存原始清算分布数据
+          marketTrend
+        };
+      } catch (error) {
+        console.error('生成清算数据失败:', error);
+        // 返回默认数据
+        return generateDefaultLiquidationData(coin);
+      }
+    }
+
+    /**
+     * 生成默认清算数据（备用）
+     */
+    function generateDefaultLiquidationData(coin) {
+      const priceMap = {
+        'BTC': 82382,
+        'ETH': 3245.80,
+        'SOL': 218.75,
+        'BNB': 615.20,
+        'XRP': 2.15,
+        'ADA': 0.52,
+        'DOGE': 0.0876,
+        'AVAX': 35.20,
+        'LINK': 14.85,
+        'DOT': 6.95,
+        'MATIC': 0.78
+      };
+
+      const basePrice = priceMap[coin] || 82382;
+      const minPrice = basePrice * 0.95;
+      const maxPrice = basePrice * 1.14;
+      const numPoints = 70;
+
+      const prices = [];
+      for (let i = 0; i < numPoints; i++) {
+        const price = minPrice + (maxPrice - minPrice) * (i / (numPoints - 1));
+        prices.push(price);
+      }
+
+      const leverageData = {};
+      const leverages = ['10x', '25x', '50x', '100x'];
+      leverages.forEach(leverage => {
+        leverageData[leverage] = { longPositions: [], shortPositions: [], maxOI: 0 };
+      });
+
+      prices.forEach(price => {
+        const percentFromCurrent = (price - basePrice) / basePrice;
+        leverages.forEach((leverage, idx) => {
+          const multiplier = 1 + idx * 0.5;
+          leverageData[leverage].longPositions.push(
+            Math.max(0, 50 * multiplier + Math.sin(percentFromCurrent * 5) * 30 * multiplier + Math.random() * 20)
+          );
+          leverageData[leverage].shortPositions.push(
+            Math.max(0, 50 * multiplier - Math.sin(percentFromCurrent * 5) * 30 * multiplier + Math.random() * 20)
+          );
+        });
+      });
+
+      Object.keys(leverageData).forEach(leverage => {
+        const maxLong = Math.max(...leverageData[leverage].longPositions);
+        const maxShort = Math.max(...leverageData[leverage].shortPositions);
+        leverageData[leverage].maxOI = Math.max(maxLong, maxShort);
+      });
+
+      priceRange.min = minPrice;
+      priceRange.max = maxPrice;
+      priceRange.current = basePrice;
+
+      return { prices, leverageData };
+    }
+
+    // 定义杠杆数组
+    const leverages = ['10x', '25x', '50x', '100x'];
+
+    function drawLiquidationChart() {
+      const canvas = document.getElementById('liquidationChart');
+      if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+      }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('Failed to get canvas context');
+        return;
+      }
+
+      // 设置canvas尺寸（支持高DPI）
+      const container = canvas.parentElement;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = container.getBoundingClientRect();
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = rect.height;
+
+      // 清空画布
+      ctx.clearRect(0, 0, width, height);
+
+      // 配置参数
+      const padding = { top: 20, right: 60, bottom: 40, left: 60 };
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+
+      // 获取当前杠杆的数据
+      let longPositions, shortPositions, maxOI;
+      
+      if (currentLeverage === 'all') {
+        // 聚合所有杠杆的数据
+        const prices = liquidationData.prices;
+        longPositions = new Array(prices.length).fill(0);
+        shortPositions = new Array(prices.length).fill(0);
+        
+        leverages.forEach(lev => {
+          const levData = liquidationData.leverageData[lev];
+          if (levData) {
+            levData.longPositions.forEach((val, idx) => {
+              longPositions[idx] += val;
+            });
+            levData.shortPositions.forEach((val, idx) => {
+              shortPositions[idx] += val;
+            });
+          }
+        });
+        
+        maxOI = Math.max(
+          Math.max(...longPositions),
+          Math.max(...shortPositions)
+        );
+      } else {
+        // 获取单个杠杆的数据
+        const leverage = liquidationData.leverageData[currentLeverage];
+        if (!leverage) {
+          console.error('杠杆数据不存在:', currentLeverage);
+          return;
+        }
+
+        longPositions = leverage.longPositions;
+        shortPositions = leverage.shortPositions;
+        maxOI = leverage.maxOI;
+      }
+
+      const prices = liquidationData.prices;
+
+      // 计算当前价格在X轴的位置
+      const currentPriceX = padding.left + chartWidth * ((priceRange.current - priceRange.min) / (priceRange.max - priceRange.min));
+
+      // 绘制背景网格
+      ctx.strokeStyle = '#363c45';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (chartHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(padding.left + chartWidth, y);
+        ctx.stroke();
+      }
+
+      // 绘制当前价格垂直线（虚线）
+      ctx.strokeStyle = '#fcd535';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(currentPriceX, padding.top);
+      ctx.lineTo(currentPriceX, padding.top + chartHeight);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 绘制当前价格标签
+      ctx.fillStyle = '#fcd535';
+      ctx.font = 'bold 11px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(
+        `$${priceRange.current.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+        currentPriceX,
+        padding.top - 5
+      );
+
+      // 计算每个价格点的X坐标
+      const xPositions = prices.map(price =>
+        padding.left + chartWidth * ((price - priceRange.min) / (priceRange.max - priceRange.min))
+      );
+
+      // 绘制空单持仓柱子（左侧，红色）
+      const barWidth = Math.max(1, (chartWidth / prices.length) * 0.8);
+      const colors = leverageColors[currentLeverage].gradient;
+
+      prices.forEach((price, index) => {
+        const x = xPositions[index];
+        const shortOI = shortPositions[index];
+        const longOI = longPositions[index];
+
+        // 如果价格小于当前价格，绘制空单持仓（左侧）
+        if (price <= priceRange.current) {
+          const barHeight = (shortOI / maxOI) * chartHeight * 0.9;
+          const gradient = ctx.createLinearGradient(x, padding.top + chartHeight, x, padding.top + chartHeight - barHeight);
+          gradient.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
+          gradient.addColorStop(1, 'rgba(239, 68, 68, 0.3)');
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.roundRect(x - barWidth / 2, padding.top + chartHeight - barHeight, barWidth, barHeight, [2, 2, 0, 0]);
+          ctx.fill();
+        }
+
+        // 如果价格大于当前价格，绘制多单持仓（右侧）
+        if (price >= priceRange.current) {
+          const barHeight = (longOI / maxOI) * chartHeight * 0.9;
+          const gradient = ctx.createLinearGradient(x, padding.top + chartHeight, x, padding.top + chartHeight - barHeight);
+          gradient.addColorStop(0, 'rgba(34, 197, 94, 0.8)');
+          gradient.addColorStop(1, 'rgba(34, 197, 94, 0.3)');
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.roundRect(x - barWidth / 2, padding.top + chartHeight - barHeight, barWidth, barHeight, [2, 2, 0, 0]);
+          ctx.fill();
+        }
+      });
+
+      // 绘制X轴刻度和标签
+      ctx.fillStyle = '#848e9c';
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+
+      const numTicks = 5;
+      for (let i = 0; i <= numTicks; i++) {
+        const x = padding.left + (chartWidth / numTicks) * i;
+        const price = priceRange.min + (priceRange.max - priceRange.min) * (i / numTicks);
+        const priceLabel = (price >= 1000)
+          ? `${(price / 1000).toFixed(0)}K`
+          : price.toFixed(0);
+
+        ctx.fillText(priceLabel, x, padding.top + chartHeight + 8);
+
+        // 绘制刻度线
+        ctx.strokeStyle = '#474d57';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, padding.top + chartHeight);
+        ctx.lineTo(x, padding.top + chartHeight + 5);
+        ctx.stroke();
+      }
+
+      // 绘制Y轴刻度
+      ctx.fillStyle = '#848e9c';
+      ctx.font = '10px Inter';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+
+      const numYTicks = 5;
+      for (let i = 0; i <= numYTicks; i++) {
+        const y = padding.top + (chartHeight / numYTicks) * i;
+        const oiValue = maxOI * (1 - i / numYTicks);
+        const oiLabel = oiValue >= 1000 ? `${(oiValue / 1000).toFixed(1)}K` : oiValue.toFixed(0);
+
+        ctx.fillText(oiLabel, padding.left - 10, y);
+
+        // 绘制刻度线
+        ctx.strokeStyle = '#474d57';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding.left - 5, y);
+        ctx.lineTo(padding.left, y);
+        ctx.stroke();
+      }
+
+      // 绘制X轴和Y轴标签
+      ctx.fillStyle = '#848e9c';
+      ctx.font = '11px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('价格', padding.left + chartWidth / 2, height - 8);
+
+      ctx.save();
+      ctx.translate(15, padding.top + chartHeight / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('持仓量 (M)', 0, 0);
+      ctx.restore();
+
+      // 添加鼠标交互
+      canvas.onmousemove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // 找到对应的价格点
+        let closestIndex = -1;
+        let closestDistance = Infinity;
+
+        xPositions.forEach((x, index) => {
+          const distance = Math.abs(mouseX - x);
+          if (distance < closestDistance && distance < barWidth * 2) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+
+        if (closestIndex >= 0) {
+          const price = prices[closestIndex];
+          const shortOI = shortPositions[closestIndex];
+          const longOI = longPositions[closestIndex];
+          const percent = ((price - priceRange.current) / priceRange.current * 100).toFixed(2);
+          showLiquidationTooltip(e.clientX, e.clientY, { price, shortOI, longOI }, percent);
+        } else {
+          hideLiquidationTooltip();
+        }
+      };
+
+      canvas.onmouseleave = () => {
+        hideLiquidationTooltip();
+      };
+    }
+
+    function showLiquidationTooltip(x, y, data, percent) {
+      const tooltip = document.getElementById('liquidationTooltip');
+      const tooltipPrice = document.getElementById('tooltipPrice');
+      const tooltipPercent = document.getElementById('tooltipPercent');
+      const tooltipLongValue = document.getElementById('tooltipLongValue');
+      const tooltipShortValue = document.getElementById('tooltipShortValue');
+
+      tooltipPrice.textContent = `$${data.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+      tooltipPercent.textContent = `${parseFloat(percent) > 0 ? '+' : ''}${percent}%`;
+      tooltipPercent.className = `text-xs ${parseFloat(percent) > 0 ? 'text-green-400' : 'text-red-400'}`;
+      tooltipLongValue.textContent = `${data.longOI.toFixed(1)}M`;
+      tooltipShortValue.textContent = `${data.shortOI.toFixed(1)}M`;
+
+      // 计算tooltip位置
+      const container = document.getElementById('liquidationChartContainer');
+      const containerRect = container.getBoundingClientRect();
+
+      let tooltipX = x - containerRect.left + 15;
+      let tooltipY = y - containerRect.top - 20;
+
+      // 防止tooltip超出边界
+      if (tooltipX + 180 > containerRect.width) {
+        tooltipX = x - containerRect.left - 200;
+      }
+      if (tooltipY < 10) {
+        tooltipY = 10;
+      }
+      if (tooltipY + 100 > containerRect.height) {
+        tooltipY = containerRect.height - 110;
+      }
+
+      tooltip.style.left = tooltipX + 'px';
+      tooltip.style.top = tooltipY + 'px';
+      tooltip.classList.remove('hidden');
+    }
+
+    function hideLiquidationTooltip() {
+      const tooltip = document.getElementById('liquidationTooltip');
+      tooltip.classList.add('hidden');
+    }
+
+    function updateCurrentPrice() {
+      // 更新当前价格显示
+      const currentPriceEl = document.getElementById('liquidationCurrentPrice');
+      if (currentPriceEl && priceRange.current) {
+        currentPriceEl.textContent = priceRange.current.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      // 更新价格区间显示
+      const rangeLeftPrice = document.getElementById('rangeLeftPrice');
+      const rangeRightPrice = document.getElementById('rangeRightPrice');
+      if (rangeLeftPrice) {
+        rangeLeftPrice.textContent = (priceRange.min / 1000).toFixed(0) + 'K';
+      }
+      if (rangeRightPrice) {
+        rangeRightPrice.textContent = (priceRange.max / 1000).toFixed(0) + 'K';
+      }
+
+      // 更新时间
+      const updateTime = document.getElementById('liquidationUpdateTime');
+      const now = new Date();
+      updateTime.textContent = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+    }
+
+    function generateMockNews(type, data) {
+      const newsTypes = ['latest', 'hot', 'kol'];
+      const currentIndex = newsTypes.indexOf(type);
+      const titles = {
+        latest: [
+          { title: '比特币突破关键阻力位，市场情绪转暖', summary: '比特币成功突破关键阻力位，市场情绪显著改善，多头力量增强。', fullSummary: '比特币成功突破关键阻力位，市场情绪显著改善。分析师指出，此次突破伴随着交易量的大幅增加，表明多头力量强劲。短期内可能迎来进一步上涨空间，建议投资者关注关键支撑位的表现。' },
+          { title: '以太坊2.0质押量创历史新高', summary: '以太坊2.0质押量持续增长，创历史新高，显示投资者信心。', fullSummary: '以太坊2.0质押量持续增长，创下历史新高。数据显示，目前已有超过2000万枚ETH被锁定在信标链中，占流通供应量的18%以上。这表明投资者对以太坊网络升级的长期价值充满信心，同时也为网络提供了更强的安全性保障。' },
+          { title: 'DeFi总锁仓量回升至500亿美元', summary: 'DeFi总锁仓量回升至500亿美元，市场流动性改善。', fullSummary: 'DeFi总锁仓量回升至500亿美元大关，显示出市场流动性的明显改善。主要驱动力来自于以太坊Layer2解决方案的广泛应用，以及新型DeFi协议的创新推出。专家预测，随着更多机构资金的进入，DeFi市场将迎来新一轮的增长周期。' },
+          { title: 'USDC发行方Circle获银行牌照', summary: 'USDC发行方Circle获得银行牌照，提升监管合规性。', fullSummary: 'USDC发行方Circle成功获得银行牌照，这标志着稳定币监管合规性的重大突破。获得银行牌照后，Circle将能够在更严格的监管框架下运营，这将为USDC带来更强的市场信心和更广泛的应用场景，特别是在机构投资者中。' },
+          { title: '币安上线新的永续合约交易对', summary: '币安上线多个新的永续合约交易对，丰富交易选择。', fullSummary: '币安宣布上线多个新的永续合约交易对，包括多个热门DeFi代币和新兴Layer2项目代币。这一举措为投资者提供了更多样化的交易选择，同时也反映了市场对这些项目的高度关注。新增交易对的杠杆倍数最高可达125倍，满足不同风险偏好的投资者需求。' }
+        ],
+        hot: [
+          { title: '特斯拉再次购买比特币1.5亿美元', summary: '特斯拉再次购买1.5亿美元比特币，坚定持有态度。', fullSummary: '特斯拉再次大手笔购买1.5亿美元比特币，显示出对比特币长期价值的坚定信心。此次购买发生在比特币价格回调期间，可能被视为逢低加仓的明智之举。分析师认为，这可能会引发更多企业跟随，推动比特币价格上涨。' },
+          { title: 'Solana链上交易量激增200%', summary: 'Solana链上交易量激增200%，生态系统活跃度提升。', fullSummary: 'Solana链上交易量在过去一周内激增200%，显示出生态系统的强劲复苏。主要驱动力包括NFT市场的火爆、DeFi协议的繁荣，以及多个优质项目的上线。网络性能的持续优化也为交易量的增长提供了技术支撑。' },
+          { title: '狗狗币社区宣布重大升级计划', summary: '狗狗币社区宣布重大升级计划，提升网络性能。', fullSummary: '狗狗币社区正式宣布重大升级计划，旨在提升网络交易速度和降低交易费用。此次升级将引入更高效的共识机制，并优化区块链结构。市场对此反应积极，狗狗币价格应声上涨，显示出社区对项目前景的看好。' },
+          { title: '贝莱德比特币ETF获SEC批准', summary: '贝莱德比特币ETF获SEC批准，机构投资渠道拓宽。', fullSummary: '贝莱德比特币ETF正式获得SEC批准，这标志着加密货币进入主流金融市场的又一重要里程碑。作为全球最大的资产管理公司，贝莱德的参与将为比特币带来大量机构资金，预计将在短期内对比特币价格产生积极影响。' },
+          { title: 'GameFi板块集体上涨', summary: 'GameFi板块集体上涨，市场热度持续升温。', fullSummary: 'GameFi板块近期集体上涨，多个热门游戏代币涨幅超过50%。这反映出市场对链游行业的持续看好，以及优质游戏项目的强劲基本面。随着更多大型游戏厂商的进入和技术的不断进步，GameFi有望成为下一个爆发点。' }
+        ],
+        kol: [
+          { title: '@VitalikButerin：以太坊Layer2解决方案取得重大进展', summary: 'Vitalik Buterin表示以太坊Layer2解决方案取得重大进展。', fullSummary: '以太坊联合创始人Vitalik Buterin在Twitter上表示，以太坊Layer2解决方案取得了重大进展。他指出，Optimistic Rollups和ZK-Rollups等技术已经达到了商业应用的标准，预计在未来6-12个月内将大规模部署。这将为以太坊网络带来革命性的扩容效果。' },
+          { title: '@elonmusk：狗狗币将用于Twitter支付', summary: 'Elon Musk透露狗狗币将用于Twitter支付功能。', fullSummary: 'Twitter CEO Elon Musk透露，计划将狗狗币整合到Twitter支付系统中。这一消息立即引发了市场的强烈反响，狗狗币价格在短时间内大幅上涨。马斯克表示，选择狗狗币是因为其交易速度快、费用低，且拥有庞大的社区支持。' },
+          { title: '@cz_binance：加密市场正在复苏', summary: '币安创始人CZ表示加密市场正在复苏，看好长期发展。', fullSummary: '币安创始人CZ在接受采访时表示，加密货币市场正在从低谷中复苏，他对行业的长期发展充满信心。他指出，尽管短期内可能仍有波动，但技术创新和监管完善将推动行业持续发展。他还强调，投资者应该关注项目的真实价值而非短期炒作。' },
+          { title: '@SatoshiLite：莱特币将实现隐私交易', summary: '莱特币创始人表示莱特币将实现隐私交易功能。', fullSummary: '莱特币创始人Charlie Lee宣布，莱特币将引入隐私交易功能，通过MimbleWimble技术实现交易的完全匿名。这一升级将使莱特币在隐私保护方面与门罗币等隐私币竞争，同时也为其带来更广泛的应用场景。升级预计将在今年内完成。' },
+          { title: '@VitalikButerin：PoS升级后以太坊能耗下降99.95%', summary: 'Vitalik Buterin表示PoS升级后以太坊能耗下降99.95%。', fullSummary: '以太坊联合创始人Vitalik Buterin发布数据显示，以太坊从PoW转向PoS后，能源消耗下降了99.95%。这一成就使得以太坊成为最环保的主流区块链之一，为加密货币行业的可持续发展树立了标杆。他还呼吁其他区块链项目积极采用更环保的共识机制。' }
+        ]
+      };
+
+      return titles[type]?.map((item, index) => ({
+        title: item.title,
+        summary: item.summary,
+        fullSummary: item.fullSummary,
+        time: `${index + 1}小时前`
+      })) || [];
+    }
+
+    // ==================== 排行榜数据 ====================
+    async function loadRankingData() {
+      const loadingEl = document.getElementById('rankingLoading');
+      const contentEl = document.getElementById('rankingContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        const coins = data || [];
+
+        loadingEl.classList.add('hidden');
+
+        let sortedCoins = [...coins];
+        if (currentRankingType === 'top') {
+          sortedCoins.sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0));
+        } else if (currentRankingType === 'bottom') {
+          sortedCoins.sort((a, b) => (a.price_change_percentage_24h || 0) - (b.price_change_percentage_24h || 0));
+        } else if (currentRankingType === 'active') {
+          sortedCoins.sort((a, b) => (b.total_volume || 0) - (a.total_volume || 0));
+        } else {
+          sortedCoins.sort((a, b) => (a.market_cap || 0) - (b.market_cap || 0));
+        }
+
+        const tbody = document.getElementById('rankingTable');
+        tbody.innerHTML = sortedCoins.map((coin, index) => `
+          <tr class="table-row">
+            <td class="py-3 font-medium text-slate-400">${index + 1}</td>
+            <td class="py-3">
+              <div class="flex items-center gap-2">
+                <img src="${coin.image || ''}" alt="${coin.symbol || ''}" class="w-6 h-6 rounded-full" onerror="this.style.display='none';this.nextElementSibling?.style?.display='flex'">
+                <div>
+                  <p class="font-medium text-white">${coin.symbol?.toUpperCase() || '-'}</p>
+                  <p class="text-xs text-slate-400">${coin.name || '-'}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 font-medium">$${(coin.current_price || 0).toLocaleString()}</td>
+            <td class="py-3">
+              <span class="${coin.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'} font-medium">
+                ${coin.price_change_percentage_24h >= 0 ? '+' : ''}${(coin.price_change_percentage_24h || 0).toFixed(2)}%
+              </span>
+            </td>
+            <td class="py-3 text-slate-300">$${formatNumber(coin.total_volume || 0)}</td>
+          </tr>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载排行榜失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    // ==================== 市场概览数据 ====================
+    async function loadMarketOverview() {
+      const loadingEl = document.getElementById('marketOverviewLoading');
+      const contentEl = document.getElementById('marketOverviewContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=100',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+
+        const coins = Array.isArray(data) ? data : [];
+
+        // 计算全网市值
+        const totalMarketCap = coins.reduce((sum, coin) => sum + (coin.market_cap || 0), 0);
+
+        // 计算BTC占比
+        const btcCoin = coins.find(coin => coin.symbol?.toLowerCase() === 'btc');
+        const btcDominance = btcCoin ? (btcCoin.market_cap / totalMarketCap * 100).toFixed(1) : '52.3';
+
+        // 涨跌币种数量
+        const upCoins = coins.filter(coin => coin.price_change_percentage_24h >= 0).length;
+        const downCoins = coins.filter(coin => coin.price_change_percentage_24h < 0).length;
+
+        contentEl.innerHTML = `
+          <div class="grid grid-cols-1 gap-3">
+            <div class="overview-card">
+              <p class="text-xs text-yellow-300 mb-1">全网市值</p>
+              <p class="text-2xl font-bold text-white">$${formatNumber(totalMarketCap)}</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-yellow-300 mb-1">BTC占比</p>
+              <p class="text-2xl font-bold text-white">${btcDominance}%</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-green-300 mb-1">上涨币种</p>
+              <p class="text-2xl font-bold text-white">${upCoins}</p>
+              <p class="text-xs text-slate-400 mt-0.5">共 ${coins.length} 个币种</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-red-300 mb-1">下跌币种</p>
+              <p class="text-2xl font-bold text-white">${downCoins}</p>
+              <p class="text-xs text-slate-400 mt-0.5">共 ${coins.length} 个币种</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-pink-300 mb-1">全网24h交易量</p>
+              <p class="text-2xl font-bold text-white">$${formatNumber(coins.reduce((sum, coin) => sum + (coin.total_volume || 0), 0))}</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-orange-300 mb-1">活跃币种</p>
+              <p class="text-2xl font-bold text-white">${coins.length} <span class="text-sm text-slate-400">个</span></p>
+              <p class="text-xs text-slate-400 mt-0.5">Top 100 活跃币种</p>
+            </div>
+            <div class="overview-card">
+              <p class="text-xs text-cyan-300 mb-1">市场热度</p>
+              <p class="text-2xl font-bold text-white">${(upCoins / coins.length * 100).toFixed(1)}%</p>
+              <p class="text-xs text-slate-400 mt-0.5">上涨占比</p>
+            </div>
+          </div>
+        `;
+
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载市场概览失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    async function loadFearGreedData() {
+      const loadingEl = document.getElementById('fearGreedLoading');
+      const contentEl = document.getElementById('fearGreedContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        // 模拟恐惧贪婪指数数据
+        const fearGreedValue = Math.floor(Math.random() * 100);
+        let label = '中性';
+        let colorClass = 'text-slate-300';
+
+        if (fearGreedValue >= 75) {
+          label = '极度贪婪';
+          colorClass = 'text-red-500';
+        } else if (fearGreedValue >= 55) {
+          label = '贪婪';
+          colorClass = 'text-green-500';
+        } else if (fearGreedValue <= 25) {
+          label = '极度恐慌';
+          colorClass = 'text-orange-500';
+        } else if (fearGreedValue <= 45) {
+          label = '恐慌';
+          colorClass = 'text-yellow-500';
+        }
+
+        contentEl.innerHTML = `
+          <div class="text-center">
+            <p class="text-xs text-slate-400 mb-2">恐慌贪婪指数</p>
+            <p class="text-6xl font-bold ${colorClass} mb-2">${fearGreedValue}</p>
+            <p class="text-sm ${colorClass} font-medium">${label}</p>
+            <div class="mt-4 h-3 bg-slate-700 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500" style="width: ${fearGreedValue}%"></div>
+            </div>
+            <div class="flex justify-between mt-1 text-xs text-slate-500">
+              <span>0</span>
+              <span>50</span>
+              <span>100</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-4">恐慌: 0-25 | 恐惧: 26-45 | 中性: 46-54 | 贪婪: 55-74 | 极度贪婪: 75-100</p>
+          </div>
+        `;
+
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载恐惧贪婪指数失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    // ==================== 策略信号 ====================
+    async function loadStrategySignal() {
+      const loadingEl = document.getElementById('signalLoading');
+      const contentEl = document.getElementById('signalContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=10',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+        const signals = generateMockSignals(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = signals.map(signal => `
+          <div class="strategy-card ${signal.type}">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">${signal.icon}</span>
+                <span class="font-bold text-white">${signal.coin}</span>
+              </div>
+              <span class="px-2 py-1 rounded text-xs font-medium ${signal.type === 'buy' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                ${signal.action}
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mb-1">${signal.reason}</p>
+            <p class="text-xs text-slate-500">价格: $${signal.price}</p>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载策略信号失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockSignals(data) {
+      // CoinGecko API 返回的是直接数组，不是 {tickers: [...]}
+      const coins = Array.isArray(data) ? data.slice(0, 5) : [];
+      return coins.map(coin => ({
+        coin: coin.symbol?.toUpperCase() || 'BTC',
+        icon: '🚀',
+        type: (coin.price_change_percentage_24h || 0) > 0 ? 'buy' : 'sell',
+        action: (coin.price_change_percentage_24h || 0) > 0 ? '买入信号' : '卖出信号',
+        reason: (coin.price_change_percentage_24h || 0) > 0 ? '突破关键阻力位' : '跌破支撑位',
+        price: (coin.current_price || 0).toFixed(2)
+      }));
+    }
+
+    // ==================== 多币种策略 ====================
+    async function loadStrategyMulticoin() {
+      const loadingEl = document.getElementById('multicoinLoading');
+      const contentEl = document.getElementById('multicoinContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=10',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+        const strategies = generateMockStrategies(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = strategies.map(strategy => `
+          <div class="strategy-card">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-white">${strategy.name}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
+                ${strategy.return}
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mb-1">${strategy.description}</p>
+            <div class="flex gap-1 mt-2">
+              ${strategy.coins.map(coin => `<span class="text-xs bg-slate-700 px-2 py-1 rounded">${coin}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载多币种策略失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockStrategies(data) {
+      return [
+        {
+          name: '均值回归策略',
+          description: '利用价格偏离均值后的回归特性',
+          return: '+15.2%',
+          coins: ['BTC', 'ETH', 'BNB']
+        },
+        {
+          name: '动量跟随策略',
+          description: '追踪市场趋势，顺势而为',
+          return: '+22.8%',
+          coins: ['SOL', 'AVAX', 'MATIC']
+        },
+        {
+          name: '套利策略',
+          description: '跨交易所价格差异套利',
+          return: '+8.5%',
+          coins: ['USDT', 'USDC']
+        }
+      ];
+    }
+
+    // ==================== 布林带分析 ====================
+    async function loadStrategyBollinger() {
+      const loadingEl = document.getElementById('bollingerLoading');
+      const contentEl = document.getElementById('bollingerContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=10',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+        const bollingerData = generateMockBollinger(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = bollingerData.map(item => `
+          <div class="bollinger-card ${item.strength}">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-white">${item.coin}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium ${item.strength === 'strong-buy' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                ${item.signal}
+              </span>
+            </div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">上轨: $${item.upper}</span>
+              <span class="text-slate-400">下轨: $${item.lower}</span>
+            </div>
+            <p class="text-xs text-slate-500">当前: $${item.current} (${item.position})</p>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载布林带分析失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockBollinger(data) {
+      // CoinGecko API 返回的是直接数组，不是 {tickers: [...]}
+      const coins = Array.isArray(data) ? data.slice(0, 4) : [];
+      return coins.map(coin => {
+        const price = coin.current_price || 0;
+        const upper = price * 1.05;
+        const lower = price * 0.95;
+        const position = price > 0 ? ((price - lower) / (upper - lower) * 100).toFixed(0) : '50';
+        const strength = position > 80 ? 'strong-sell' : position < 20 ? 'strong-buy' : '';
+
+        return {
+          coin: coin.symbol?.toUpperCase() || 'BTC',
+          upper: upper.toFixed(2),
+          lower: lower.toFixed(2),
+          current: price.toFixed(2),
+          position: position + '%',
+          signal: position > 80 ? '强烈卖出' : position < 20 ? '强烈买入' : '持有',
+          strength
+        };
+      });
+    }
+
+    // ==================== 市场异动数据 ====================
+    async function loadMarketAnomalyData() {
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/aggregated?endpoint=coins/markets&vs_currency=usd&per_page=10',
+          '/api/proxy/backup-data?type=market',
+          15000
+        );
+
+        // 爆仓监控
+        document.getElementById('liquidationContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC/USDT</span>
+            <span class="text-red-400 font-medium">-$2.5M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH/USDT</span>
+            <span class="text-green-400 font-medium">+$1.8M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL/USDT</span>
+            <span class="text-red-400 font-medium">-$850K</span>
+          </div>
+        `;
+
+        // 大单异动
+        document.getElementById('whaleContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC</span>
+            <span class="text-orange-400 font-medium">500 BTC</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH</span>
+            <span class="text-orange-400 font-medium">5,000 ETH</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">USDT</span>
+            <span class="text-orange-400 font-medium">10M USDT</span>
+          </div>
+        `;
+
+        // 资金费率
+        document.getElementById('fundingContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC/USDT</span>
+            <span class="text-green-400 font-medium">0.0100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH/USDT</span>
+            <span class="text-green-400 font-medium">0.0120%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL/USDT</span>
+            <span class="text-red-400 font-medium">-0.0050%</span>
+          </div>
+        `;
+
+        // 未平仓合约
+        document.getElementById('oiContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC OI</span>
+            <span class="text-amber-400 font-medium">$15.2B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH OI</span>
+            <span class="text-amber-400 font-medium">$8.5B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL OI</span>
+            <span class="text-amber-400 font-medium">$2.1B</span>
+          </div>
+        `;
+
+        // 订单簿深度
+        document.getElementById('orderbookContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 买单</span>
+            <span class="text-yellow-400 font-medium">$8.5M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 卖单</span>
+            <span class="text-red-400 font-medium">$7.2M</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">买盘占优 54%</div>
+        `;
+
+        // 价格波动率
+        document.getElementById('volatilityContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 24h</span>
+            <span class="text-orange-400 font-medium">3.2%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH 24h</span>
+            <span class="text-orange-400 font-medium">4.1%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL 24h</span>
+            <span class="text-orange-400 font-medium">6.8%</span>
+          </div>
+        `;
+
+        // 24h高低点
+        document.getElementById('highlowContent').innerHTML = `
+          <div class="mb-2">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">BTC</span>
+              <span class="text-slate-400">$95,000 - $98,500</span>
+            </div>
+          </div>
+          <div class="mb-2">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">ETH</span>
+              <span class="text-slate-400">$3,200 - $3,450</span>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">SOL</span>
+              <span class="text-slate-400">$210 - $235</span>
+            </div>
+          </div>
+        `;
+
+        // 成交量分析
+        document.getElementById('volumeContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 24h</span>
+            <span class="text-pink-400 font-medium">$28.5B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH 24h</span>
+            <span class="text-pink-400 font-medium">$15.2B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL 24h</span>
+            <span class="text-pink-400 font-medium">$5.8B</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">BTC成交量占比 45%</div>
+        `;
+
+      } catch (error) {
+        console.error('加载市场异动数据失败:', error);
+      }
+    }
+
+    // ==================== 标签切换 ====================
+    function switchRankingType(type) {
+      currentRankingType = type;
+      document.querySelectorAll('.ranking-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`ranking-tab-${type}`).classList.add('active');
+      loadRankingData();
+    }
+
+    function switchOverviewTab(type) {
+      document.querySelectorAll('.overview-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`overview-tab-${type}`).classList.add('active');
+      document.querySelectorAll('.overview-sub-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`overview-${type}`).classList.add('active');
+
+      if (type === 'market') {
+        loadMarketOverview();
+      } else if (type === 'feargreed') {
+        loadFearGreedData();
+      }
+    }
+
+    function switchStrategyTab(tab) {
+      currentStrategyTab = tab;
+      document.querySelectorAll('.strategy-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`strategy-tab-${tab}`).classList.add('active');
+      document.querySelectorAll('.strategy-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`strategy-${tab}`).classList.add('active');
+    }
+
+    // ==================== 工具函数 ====================
+    function formatNumber(num) {
+      if (num >= 1e9) {
+        return (num / 1e9).toFixed(2) + 'B';
+      } else if (num >= 1e6) {
+        return (num / 1e6).toFixed(2) + 'M';
+      } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(2) + 'K';
+      }
+      return num.toFixed(2);
+    }
+
+    // 页面卸载时清除定时器
+    window.addEventListener('beforeunload', () => {
+      if (newsRotationTimer) {
+        clearInterval(newsRotationTimer);
+      }
+    });
+  </script>
+
+  <!-- 弹窗模态框 -->
+  <div id="modal" class="fixed inset-0 z-50 hidden">
+    <div id="modalOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="glass-card w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
+        <div class="flex items-center justify-between p-6 border-b border-slate-700/50">
+          <h2 id="modalTitle" class="text-xl font-bold text-white">详情</h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div id="modalContent" class="flex-1 overflow-y-auto p-6"></div>
+        <div class="p-4 border-t border-slate-700/50 flex justify-end gap-3">
+          <button onclick="closeModal()" class="btn-secondary">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/modal.js"></script>
+</body>
+</html>

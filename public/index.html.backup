@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelloYan - 智能加密货币策略分析</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #0b0e11;
+      color: #eaecef;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(252, 213, 53, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(240, 185, 11, 0.03) 0%, transparent 50%);
+    }
+
+    .particles {
+      display: none;
+    }
+
+    .particle {
+      display: none;
+    }
+
+    @keyframes particleFloat {
+      display: none;
+    }
+
+    .glass-card {
+      background: #1e2329;
+      backdrop-filter: blur(20px);
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: #474d57;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(252, 213, 53, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fcd535 0%, #f0b90b 50%, #f99d1c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border: none;
+      color: #0b0e11;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 157, 28, 0.4);
+      background: linear-gradient(135deg, #fcd535 0%, #f99d1c 100%);
+    }
+
+    .ranking-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .ranking-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .ranking-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.5;
+      }
+    }
+
+    .status-online {
+      background: #0ecb81;
+      box-shadow: 0 0 10px rgba(14, 203, 129, 0.8);
+    }
+
+    .data-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .data-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 20px rgba(252, 213, 53, 0.15);
+    }
+
+    .strategy-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .strategy-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 30px rgba(252, 213, 53, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .table-row {
+      transition: all 0.3s ease;
+      border-bottom: 1px solid #2b3139;
+    }
+
+    .table-row:hover {
+      background: rgba(252, 213, 53, 0.08);
+      border-bottom-color: #fcd535;
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .loading-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 市场数据标签切换 */
+    .market-data-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .market-data-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .market-data-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .market-data-content {
+      display: none;
+    }
+
+    .market-data-content.active {
+      display: block;
+    }
+
+    /* 市场概览子标签切换 */
+    .overview-sub-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .overview-sub-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .overview-sub-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .overview-sub-content {
+      display: none;
+    }
+
+    .overview-sub-content.active {
+      display: block;
+    }
+
+    /* 策略标签切换 */
+    .strategy-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .strategy-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .strategy-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .strategy-content {
+      display: none;
+    }
+
+    .strategy-content.active {
+      display: block;
+    }
+
+    /* 市场异动监控标签切换 */
+    .market-tab {
+      background: #2b3139;
+      border: 1px solid #474d57;
+      color: #848e9c;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .market-tab:hover {
+      background: #363c44;
+      color: #eaecef;
+    }
+
+    .market-tab.active {
+      background: linear-gradient(135deg, #f99d1c 0%, #fcd535 100%);
+      border-color: transparent;
+      color: #0b0e11;
+      box-shadow: 0 4px 15px rgba(249, 157, 28, 0.3);
+    }
+
+    .market-content {
+      display: none;
+    }
+
+    .market-content.active {
+      display: block;
+    }
+
+    /* 市场概览卡片 */
+    .overview-card {
+      background: linear-gradient(135deg, rgba(30, 35, 41, 0.9), rgba(43, 49, 57, 0.9));
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .overview-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 25px rgba(252, 213, 53, 0.1);
+    }
+
+    /* 市场异动卡片 */
+    .anomaly-card {
+      background: #1e2329;
+      border: 1px solid #2b3139;
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+      min-height: 140px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .anomaly-card:hover {
+      border-color: #fcd535;
+      box-shadow: 0 0 25px rgba(252, 213, 53, 0.1);
+    }
+
+    /* 新闻轮播 */
+    .news-ticker {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .news-ticker-item {
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding-right: 30px;
+      animation: ticker 20s linear infinite;
+    }
+
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Masonry 布局 */
+    .masonry {
+      column-count: 2;
+      column-gap: 12px;
+    }
+
+    .masonry > * {
+      break-inside: avoid;
+      margin-bottom: 12px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e2329;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #474d57;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5e6673;
+    }
+
+    @media (max-width: 1280px) {
+      .glass-card {
+        border-radius: 10px;
+      }
+      .masonry {
+        column-count: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="min-h-screen p-4 md:p-6">
+    <!-- 头部 -->
+    <header class="mb-6 fade-in">
+      <div class="glass-card p-6">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl overflow-hidden shadow-lg ring-2 ring-slate-700/50">
+              <img id="siteLogo" src="logo.png" alt="HelloYan Logo" class="w-full h-full object-cover"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="hidden w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg">
+                <span class="text-2xl font-bold text-black">HY</span>
+              </div>
+            </div>
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold gradient-text">HelloYan</h1>
+              <p class="text-sm text-slate-400">智能加密货币策略分析系统</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <a href="https://x.com/Mrwu1177" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 transition-all group">
+              <svg class="w-5 h-5 text-slate-400 group-hover:text-yellow-400 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span class="text-sm text-slate-400 group-hover:text-yellow-400 transition-colors">@Mrwu1177</span>
+            </a>
+            <div class="flex items-center gap-2">
+              <div class="status-dot status-online" id="systemStatus"></div>
+              <span class="text-sm text-slate-300">系统运行中</span>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-slate-400">最后更新</p>
+              <p class="text-sm font-semibold text-white" id="lastUpdate">--:--:--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 三列布局 -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+
+      <!-- 左列：新闻追踪（轮播显示） -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.1s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">新闻追踪</h2>
+
+        <!-- 轮播显示标签 -->
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xs px-3 py-1.5 rounded-lg font-medium bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-yellow-300 border border-yellow-500/30" id="currentNewsType">最新</span>
+          <div class="flex-1 h-0.5 bg-gradient-to-r from-yellow-500/50 to-transparent"></div>
+        </div>
+
+        <div id="newsLoading" class="text-center py-4 flex-1">
+          <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+          <p class="text-sm text-slate-400">正在加载新闻...</p>
+        </div>
+
+        <div id="newsEmpty" class="hidden text-center py-4 text-slate-500">
+          暂无新闻数据
+        </div>
+
+        <div id="newsContent" class="hidden space-y-3 overflow-y-auto flex-1 pr-1">
+        </div>
+      </div>
+
+      <!-- 中列：策略分析 -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.2s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">策略分析</h2>
+
+        <!-- 策略标签切换 -->
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <button onclick="switchStrategyTab('signal')" id="strategy-tab-signal" class="strategy-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">异动信号</button>
+          <button onclick="switchStrategyTab('multicoin')" id="strategy-tab-multicoin" class="strategy-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">多币种策略</button>
+          <button onclick="switchStrategyTab('bollinger')" id="strategy-tab-bollinger" class="strategy-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">布林带分析</button>
+        </div>
+
+        <!-- 异动信号内容 -->
+        <div id="strategy-signal" class="strategy-content active flex-1 overflow-y-auto">
+          <div id="signalLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载信号...</p>
+          </div>
+          <div id="signalContent" class="hidden space-y-3"></div>
+        </div>
+
+        <!-- 多币种策略内容 -->
+        <div id="strategy-multicoin" class="strategy-content hidden flex-1 overflow-y-auto">
+          <div id="multicoinLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载策略...</p>
+          </div>
+          <div id="multicoinContent" class="hidden space-y-3"></div>
+        </div>
+
+        <!-- 布林带分析内容 -->
+        <div id="strategy-bollinger" class="strategy-content hidden flex-1 overflow-y-auto">
+          <div id="bollingerLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载布林带分析...</p>
+          </div>
+          <div id="bollingerContent" class="hidden space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- 右列：市场数据（排行榜+市场概览标签切换） -->
+      <div class="glass-card p-6 fade-in flex flex-col" style="animation-delay: 0.3s; max-height: 800px; min-height: 800px;">
+        <h2 class="text-xl font-bold text-white mb-4">市场数据</h2>
+
+        <!-- 标签切换 -->
+        <div class="flex items-center gap-2 mb-4">
+          <button onclick="switchMarketDataType('ranking')" id="market-tab-ranking" class="market-data-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">排行榜</button>
+          <button onclick="switchMarketDataType('overview')" id="market-tab-overview" class="market-data-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">市场概览</button>
+        </div>
+
+        <!-- 排行榜内容 -->
+        <div id="market-data-ranking" class="market-data-content active flex-1 flex flex-col">
+          <div class="flex items-center gap-2 mb-4">
+            <button onclick="switchRankingType('volume')" id="btn-volume" class="ranking-tab active text-xs px-4 py-2 rounded-lg font-medium transition-all">成交量</button>
+            <button onclick="switchRankingType('change')" id="btn-change" class="ranking-tab text-xs px-4 py-2 rounded-lg font-medium transition-all">涨跌幅</button>
+            <button onclick="switchRankingType('activity')" id="btn-activity" class="ranking-tab text-xs px-4 py-2 rounded-lg font-medium transition-all">活跃度</button>
+          </div>
+
+          <div id="rankingLoading" class="text-center py-4">
+            <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+            <p class="text-sm text-slate-400">正在加载排行榜...</p>
+          </div>
+
+          <div id="rankingContent" class="hidden overflow-y-auto flex-1 pr-1">
+            <table class="w-full">
+              <thead class="sticky top-0 bg-slate-900/95 z-10">
+                <tr class="text-left text-xs text-slate-400 border-b border-slate-700">
+                  <th class="pb-2 font-medium w-12">排名</th>
+                  <th class="pb-2 font-medium">币种</th>
+                  <th class="pb-2 font-medium">价格</th>
+                  <th class="pb-2 font-medium">24h涨跌</th>
+                  <th class="pb-2 font-medium">24h交易量</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTable" class="text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 市场概览内容 -->
+        <div id="market-data-overview" class="market-data-content hidden flex-1 flex flex-col">
+          <!-- 市场概览子标签切换 -->
+          <div class="flex items-center gap-2 mb-4">
+            <button onclick="switchOverviewSubTab('sentiment')" id="overview-tab-sentiment" class="overview-sub-tab active text-xs px-3 py-1.5 rounded-lg font-medium transition-all">市场情绪</button>
+            <button onclick="switchOverviewSubTab('hotspot')" id="overview-tab-hotspot" class="overview-sub-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">热点追踪</button>
+            <button onclick="switchOverviewSubTab('capital')" id="overview-tab-capital" class="overview-sub-tab text-xs px-3 py-1.5 rounded-lg font-medium transition-all">资金动向</button>
+          </div>
+
+          <!-- 市场情绪内容 -->
+          <div id="overview-sentiment" class="overview-sub-content active flex-1 overflow-y-auto">
+            <div id="sentimentLoading" class="text-center py-4">
+              <div class="loading-spin inline-block w-8 h-8 border-4 border-yellow-500/30 border-t-yellow-500 rounded-full mb-2"></div>
+              <p class="text-sm text-slate-400">正在加载市场情绪...</p>
+            </div>
+
+            <div id="sentimentContent" class="hidden space-y-3">
+              <!-- 恐慌贪婪指数 -->
+              <div class="overview-card">
+                <p class="text-xs text-yellow-300 mb-1">恐慌贪婪指数</p>
+                <p class="text-3xl font-bold" id="fearGreedIndex">--</p>
+                <p class="text-xs text-slate-400 mt-1" id="fearGreedLabel">加载中...</p>
+              </div>
+
+              <!-- 涨跌比 -->
+              <div class="overview-card">
+                <p class="text-xs text-green-300 mb-1">涨跌比</p>
+                <p class="text-3xl font-bold" id="upDownRatio">--</p>
+                <p class="text-xs text-slate-400 mt-1" id="upDownText">加载中...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 热点追踪内容 -->
+          <div id="overview-hotspot" class="overview-sub-content flex-1 overflow-y-auto">
+            <div id="hotspotLoading" class="text-center py-4">
+              <div class="loading-spin inline-block w-8 h-8 border-4 border-orange-500/30 border-t-orange-500 rounded-full mb-2"></div>
+              <p class="text-sm text-slate-400">正在加载热点追踪...</p>
+            </div>
+
+            <div id="hotspotContent" class="hidden space-y-3">
+              <!-- 1小时涨幅榜 -->
+              <div class="overview-card">
+                <p class="text-xs text-green-300 mb-2">1小时涨幅榜</p>
+                <div id="topGainers1h" class="flex flex-wrap gap-2">
+                  <span class="text-sm text-slate-400">加载中...</span>
+                </div>
+              </div>
+
+              <!-- 异动警报 -->
+              <div class="overview-card">
+                <p class="text-xs text-orange-300 mb-2">异动警报</p>
+                <div id="anomalyAlerts" class="flex flex-wrap gap-2">
+                  <span class="text-sm text-slate-400">加载中...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 资金动向内容 -->
+          <div id="overview-capital" class="overview-sub-content flex-1 overflow-y-auto">
+            <div id="capitalLoading" class="text-center py-4">
+              <div class="loading-spin inline-block w-8 h-8 border-4 border-amber-500/30 border-t-amber-500 rounded-full mb-2"></div>
+              <p class="text-sm text-slate-400">正在加载资金动向...</p>
+            </div>
+
+            <div id="capitalContent" class="hidden space-y-3">
+              <!-- BTC大额转账 -->
+              <div class="overview-card">
+                <p class="text-xs text-emerald-300 mb-1">BTC大额转账</p>
+                <p class="text-2xl font-bold text-white" id="btcLargeTransfers">0 笔</p>
+                <p class="text-xs text-slate-400 mt-0.5" id="btcTransferTotal">总额: --</p>
+              </div>
+
+              <!-- 主力资金流向 -->
+              <div class="overview-card">
+                <p class="text-xs text-yellow-300 mb-1">主力资金流向</p>
+                <p class="text-2xl font-bold" id="whaleNetFlow">--</p>
+                <p class="text-xs text-slate-400 mt-0.5" id="whaleFlowText">加载中...</p>
+              </div>
+
+              <!-- DeFi总锁仓量 -->
+              <div class="overview-card">
+                <p class="text-xs text-pink-300 mb-1">DeFi TVL</p>
+                <p class="text-2xl font-bold text-white" id="defiTvl">--</p>
+                <p class="text-xs text-slate-400 mt-0.5" id="defiChange">--</p>
+              </div>
+
+              <!-- 市场趋势 -->
+              <div class="overview-card">
+                <p class="text-xs text-yellow-300 mb-1">市场趋势</p>
+                <p class="text-2xl font-bold" id="marketTrend">--</p>
+                <p class="text-xs text-slate-400 mt-0.5" id="trendDesc">加载中...</p>
+              </div>
+
+              <!-- 全网市值 -->
+              <div class="overview-card">
+                <p class="text-xs text-slate-300 mb-1">全网市值</p>
+                <p class="text-2xl font-bold text-white" id="totalMarketCap">--</p>
+              </div>
+
+              <!-- BTC占比 -->
+              <div class="overview-card">
+                <p class="text-xs text-slate-300 mb-1">BTC占比</p>
+                <p class="text-2xl font-bold text-white" id="btcDominance">--</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 市场异动监控（三列下方，卡片布局） -->
+    <div class="glass-card p-6 fade-in mb-6">
+      <div class="flex items-center gap-3 mb-4">
+        <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <h2 class="text-xl font-bold text-white">市场异动监控</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- 爆仓监控 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+            爆仓监控
+          </h3>
+          <div id="liquidationContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 大单异动 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            大单异动
+          </h3>
+          <div id="whaleContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 资金费率 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            资金费率
+          </h3>
+          <div id="fundingContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 未平仓合约 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            未平仓合约
+          </h3>
+          <div id="oiContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 订单簿深度 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+            订单簿深度
+          </h3>
+          <div id="orderbookContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 价格波动率 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            价格波动率
+          </h3>
+          <div id="volatilityContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 24h高低点 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+            24h高低点
+          </h3>
+          <div id="highlowContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+
+        <!-- 成交量分析 -->
+        <div class="anomaly-card">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+            成交量分析
+          </h3>
+          <div id="volumeContent" class="space-y-2 text-xs">
+            <p class="text-slate-400">加载中...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="text-center py-4 text-slate-500 text-sm">
+      <p>HelloYan - 智能加密货币策略分析系统 | 数据仅供参考，不构成投资建议</p>
+    </footer>
+
+    <!-- 弹窗模态框 -->
+    <div id="modal" class="fixed inset-0 z-50 hidden">
+      <!-- 遮罩层 -->
+      <div id="modalOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+
+      <!-- 弹窗内容 -->
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
+          <!-- 弹窗头部 -->
+          <div class="flex items-center justify-between p-6 border-b border-slate-700/50">
+            <h2 id="modalTitle" class="text-xl font-bold text-white">详情</h2>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors p-2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- 弹窗内容区 -->
+          <div id="modalContent" class="flex-1 overflow-y-auto p-6">
+            <!-- 动态内容 -->
+          </div>
+
+          <!-- 弹窗底部 -->
+          <div class="p-4 border-t border-slate-700/50 flex justify-end gap-3">
+            <button onclick="closeModal()" class="btn-secondary">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==================== 全局变量和配置 ====================
+    let currentNewsType = 'latest';
+    let currentRankingType = 'volume';
+    let currentStrategyTab = 'signal';
+    let currentMarketDataType = 'ranking';
+
+    const NEWS_ROTATION_INTERVAL = 8000; // 新闻轮播间隔 8秒
+    let newsRotationTimer = null;
+
+    // ==================== 初始化 ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      initParticles();
+      loadAllData();
+      startNewsRotation();
+      setInterval(loadAllData, 30000); // 每30秒刷新一次数据
+      updateLastUpdateTime();
+      setInterval(updateLastUpdateTime, 1000);
+    });
+
+    // ==================== 粒子背景 ====================
+    function initParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // ==================== 更新时间 ====================
+    function updateLastUpdateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+      const timeEl = document.getElementById('lastUpdate');
+      if (timeEl) {
+        timeEl.textContent = timeStr;
+      }
+    }
+
+    // ==================== 加载所有数据 ====================
+    async function loadAllData() {
+      try {
+        await Promise.all([
+          loadNewsData(currentNewsType),
+          loadRankingData(),
+          loadMarketOverview(),
+          loadStrategySignal(),
+          loadStrategyMulticoin(),
+          loadStrategyBollinger(),
+          loadMarketAnomalyData()
+        ]);
+      } catch (error) {
+        console.error('加载数据失败:', error);
+      }
+    }
+
+    // ==================== 通用 API 调用（带降级策略）====================
+    async function fetchWithFallback(url, fallbackUrl, timeout = 10000) {
+      try {
+        // 尝试主 API
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        const response = await fetch(url, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          // 检查数据是否有效（不是空数组）
+          if (Array.isArray(data) && data.length > 0) {
+            return data;
+          }
+        }
+
+        throw new Error('主 API 返回无效数据');
+      } catch (error) {
+        console.log(`主 API 失败 (${url})，尝试备用 API:`, error.message);
+
+        try {
+          // 尝试备用 API
+          const response = await fetch(fallbackUrl);
+          if (response.ok) {
+            const data = await response.json();
+            console.log('使用备用数据');
+            return data;
+          }
+        } catch (fallbackError) {
+          console.error('备用 API 也失败:', fallbackError.message);
+        }
+
+        // 返回空数组
+        return [];
+      }
+    }
+
+    // ==================== 新闻数据 ====================
+    async function loadNewsData(type) {
+      const loadingEl = document.getElementById('newsLoading');
+      const contentEl = document.getElementById('newsContent');
+      const emptyEl = document.getElementById('newsEmpty');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        const newsData = generateMockNews(type, data);
+
+        loadingEl.classList.add('hidden');
+
+        if (newsData.length === 0) {
+          emptyEl.classList.remove('hidden');
+        } else {
+          contentEl.innerHTML = newsData.map(news => `
+            <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 hover:border-orange-500/30 transition-all">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1">
+                  <p class="text-sm text-white font-medium mb-1">${news.title}</p>
+                  <p class="text-xs text-slate-400 line-clamp-2">${news.summary}</p>
+                </div>
+                <span class="text-xs text-orange-400 whitespace-nowrap">${news.time}</span>
+              </div>
+            </div>
+          `).join('');
+          contentEl.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('加载新闻失败:', error);
+        loadingEl.classList.add('hidden');
+        emptyEl.textContent = '加载失败，请稍后重试';
+        emptyEl.classList.remove('hidden');
+      }
+    }
+
+    function generateMockNews(type, data) {
+      const newsTypes = ['latest', 'hot', 'kol'];
+      const currentIndex = newsTypes.indexOf(type);
+      const titles = {
+        latest: [
+          '比特币突破关键阻力位，市场情绪转暖',
+          '以太坊2.0质押量创历史新高',
+          'DeFi总锁仓量回升至500亿美元',
+          'USDC发行方Circle获银行牌照',
+          '币安上线新的永续合约交易对'
+        ],
+        hot: [
+          '特斯拉再次购买比特币1.5亿美元',
+          'Solana链上交易量激增200%',
+          '狗狗币社区宣布重大升级计划',
+          '贝莱德比特币ETF获SEC批准',
+          'GameFi板块集体上涨'
+        ],
+        kol: [
+          '@VitalikButerin：以太坊Layer2解决方案取得重大进展',
+          '@elonmusk：狗狗币将用于Twitter支付',
+          '@cz_binance：加密市场正在复苏',
+          '@SatoshiLite：莱特币将实现隐私交易',
+          '@VitalikButerin：PoS升级后以太坊能耗下降99.95%'
+        ]
+      };
+
+      return titles[type]?.map((title, index) => ({
+        title,
+        summary: '这是一条加密货币相关的重要新闻摘要，涵盖了最新的市场动态和技术发展。',
+        time: `${index + 1}小时前`
+      })) || [];
+    }
+
+    // ==================== 新闻轮播 ====================
+    function startNewsRotation() {
+      const types = ['latest', 'hot', 'kol'];
+      let currentIndex = 0;
+
+      newsRotationTimer = setInterval(() => {
+        currentIndex = (currentIndex + 1) % types.length;
+        currentNewsType = types[currentIndex];
+
+        // 更新显示的标签
+        const labelEl = document.getElementById('currentNewsType');
+        if (labelEl) {
+          const labels = {
+            latest: '最新',
+            hot: '热门',
+            kol: 'KOL'
+          };
+          labelEl.textContent = labels[currentNewsType];
+        }
+
+        loadNewsData(currentNewsType);
+      }, NEWS_ROTATION_INTERVAL);
+    }
+
+    // ==================== 排行榜数据 ====================
+    async function loadRankingData() {
+      const loadingEl = document.getElementById('rankingLoading');
+      const contentEl = document.getElementById('rankingContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        const coins = data || [];
+
+        loadingEl.classList.add('hidden');
+
+        let sortedCoins = [...coins];
+        if (currentRankingType === 'volume') {
+          sortedCoins.sort((a, b) => (b.quoteVolume || 0) - (a.quoteVolume || 0));
+        } else if (currentRankingType === 'change') {
+          sortedCoins.sort((a, b) => (b.changePercent || 0) - (a.changePercent || 0));
+        } else if (currentRankingType === 'activity') {
+          sortedCoins.sort((a, b) => (b.count || 0) - (a.count || 0));
+        }
+
+        const tbody = document.getElementById('rankingTable');
+        tbody.innerHTML = sortedCoins.map((coin, index) => `
+          <tr class="table-row">
+            <td class="py-3 font-medium text-slate-400">${index + 1}</td>
+            <td class="py-3">
+              <div class="flex items-center gap-2">
+                <img src="${coin.icon}" alt="${coin.symbol}" class="w-6 h-6 rounded-full" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${coin.symbol?.[0]}</text></svg>'">
+                <div>
+                  <p class="font-medium text-white">${coin.symbol || '-'}</p>
+                  <p class="text-xs text-slate-400">${coin.name || '-'}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 font-medium">$${(coin.last || 0).toLocaleString()}</td>
+            <td class="py-3">
+              <span class="${coin.changePercent >= 0 ? 'text-green-500' : 'text-red-500'} font-medium">
+                ${coin.changePercent >= 0 ? '+' : ''}${(coin.changePercent || 0).toFixed(2)}%
+              </span>
+            </td>
+            <td class="py-3 text-slate-300">$${formatNumber(coin.quoteVolume || 0)}</td>
+          </tr>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载排行榜失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    // ==================== 市场概览数据 ====================
+    async function loadMarketOverview() {
+      await Promise.all([
+        loadMarketSentiment(),
+        loadMarketHotspot(),
+        loadMarketCapital()
+      ]);
+    }
+
+    async function loadMarketSentiment() {
+      const loadingEl = document.getElementById('sentimentLoading');
+      const contentEl = document.getElementById('sentimentContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        // 恐慌贪婪指数
+        document.getElementById('fearGreedIndex').textContent = '65';
+        document.getElementById('fearGreedLabel').textContent = '贪婪';
+
+        // 涨跌比
+        document.getElementById('upDownRatio').textContent = '1.8';
+        document.getElementById('upDownText').textContent = '看涨';
+
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载市场情绪失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    async function loadMarketHotspot() {
+      const loadingEl = document.getElementById('hotspotLoading');
+      const contentEl = document.getElementById('hotspotContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        // 1小时涨幅榜
+        const topGainers = data?.tickers?.slice(0, 5) || [];
+        document.getElementById('topGainers1h').innerHTML = topGainers.map(coin =>
+          `<span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">${coin.symbol}: +${(coin.changePercent || 0).toFixed(2)}%</span>`
+        ).join('') || '<span class="text-sm text-slate-400">暂无数据</span>';
+
+        // 异动警报
+        document.getElementById('anomalyAlerts').innerHTML = `
+          <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded">BTC: 异常波动</span>
+          <span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">ETH: 成交量激增</span>
+        `;
+
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载热点追踪失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    async function loadMarketCapital() {
+      const loadingEl = document.getElementById('capitalLoading');
+      const contentEl = document.getElementById('capitalContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        // BTC大额转账
+        document.getElementById('btcLargeTransfers').textContent = '12 笔';
+        document.getElementById('btcTransferTotal').textContent = '总额: 2,450 BTC';
+
+        // 主力资金流向
+        document.getElementById('whaleNetFlow').textContent = '+$125M';
+        document.getElementById('whaleFlowText').textContent = '净流入';
+
+        // DeFi TVL
+        document.getElementById('defiTvl').textContent = '$52.3B';
+        document.getElementById('defiChange').textContent = '+2.4% (24h)';
+
+        // 市场趋势
+        document.getElementById('marketTrend').textContent = '上升趋势';
+        document.getElementById('trendDesc').textContent = '看涨情绪占主导';
+
+        // 全网市值
+        const totalCap = data?.tickers?.reduce((sum, coin) => sum + (coin.quoteVolume || 0), 0) || 0;
+        document.getElementById('totalMarketCap').textContent = '$' + formatNumber(totalCap);
+
+        // BTC占比
+        document.getElementById('btcDominance').textContent = '52.3%';
+
+        loadingEl.classList.add('hidden');
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载资金动向失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    // ==================== 策略信号 ====================
+    async function loadStrategySignal() {
+      const loadingEl = document.getElementById('signalLoading');
+      const contentEl = document.getElementById('signalContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+        const signals = generateMockSignals(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = signals.map(signal => `
+          <div class="strategy-card ${signal.type}">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">${signal.icon}</span>
+                <span class="font-bold text-white">${signal.coin}</span>
+              </div>
+              <span class="px-2 py-1 rounded text-xs font-medium ${signal.type === 'buy' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                ${signal.action}
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mb-1">${signal.reason}</p>
+            <p class="text-xs text-slate-500">价格: $${signal.price}</p>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载策略信号失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockSignals(data) {
+      const coins = data?.tickers?.slice(0, 5) || [];
+      return coins.map(coin => ({
+        coin: coin.symbol || 'BTC',
+        icon: '🚀',
+        type: (coin.changePercent || 0) > 0 ? 'buy' : 'sell',
+        action: (coin.changePercent || 0) > 0 ? '买入信号' : '卖出信号',
+        reason: (coin.changePercent || 0) > 0 ? '突破关键阻力位' : '跌破支撑位',
+        price: (coin.last || 0).toFixed(2)
+      }));
+    }
+
+    // ==================== 多币种策略 ====================
+    async function loadStrategyMulticoin() {
+      const loadingEl = document.getElementById('multicoinLoading');
+      const contentEl = document.getElementById('multicoinContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+        const strategies = generateMockStrategies(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = strategies.map(strategy => `
+          <div class="strategy-card">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-white">${strategy.name}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
+                ${strategy.return}
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mb-1">${strategy.description}</p>
+            <div class="flex gap-1 mt-2">
+              ${strategy.coins.map(coin => `<span class="text-xs bg-slate-700 px-2 py-1 rounded">${coin}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载多币种策略失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockStrategies(data) {
+      return [
+        {
+          name: '均值回归策略',
+          description: '利用价格偏离均值后的回归特性',
+          return: '+15.2%',
+          coins: ['BTC', 'ETH', 'BNB']
+        },
+        {
+          name: '动量跟随策略',
+          description: '追踪市场趋势，顺势而为',
+          return: '+22.8%',
+          coins: ['SOL', 'AVAX', 'MATIC']
+        },
+        {
+          name: '套利策略',
+          description: '跨交易所价格差异套利',
+          return: '+8.5%',
+          coins: ['USDT', 'USDC']
+        }
+      ];
+    }
+
+    // ==================== 布林带分析 ====================
+    async function loadStrategyBollinger() {
+      const loadingEl = document.getElementById('bollingerLoading');
+      const contentEl = document.getElementById('bollingerContent');
+
+      loadingEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+        const bollingerData = generateMockBollinger(data);
+
+        loadingEl.classList.add('hidden');
+
+        contentEl.innerHTML = bollingerData.map(item => `
+          <div class="bollinger-card ${item.strength}">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold text-white">${item.coin}</span>
+              <span class="px-2 py-1 rounded text-xs font-medium ${item.strength === 'strong-buy' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                ${item.signal}
+              </span>
+            </div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">上轨: $${item.upper}</span>
+              <span class="text-slate-400">下轨: $${item.lower}</span>
+            </div>
+            <p class="text-xs text-slate-500">当前: $${item.current} (${item.position})</p>
+          </div>
+        `).join('');
+
+        contentEl.classList.remove('hidden');
+      } catch (error) {
+        console.error('加载布林带分析失败:', error);
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    function generateMockBollinger(data) {
+      const coins = data?.tickers?.slice(0, 4) || [];
+      return coins.map(coin => {
+        const price = coin.last || 0;
+        const upper = price * 1.05;
+        const lower = price * 0.95;
+        const position = ((price - lower) / (upper - lower) * 100).toFixed(0);
+        const strength = position > 80 ? 'strong-sell' : position < 20 ? 'strong-buy' : '';
+
+        return {
+          coin: coin.symbol || 'BTC',
+          upper: upper.toFixed(2),
+          lower: lower.toFixed(2),
+          current: price.toFixed(2),
+          position: position + '%',
+          signal: position > 80 ? '强烈卖出' : position < 20 ? '强烈买入' : '持有',
+          strength
+        };
+      });
+    }
+
+    // ==================== 市场异动数据 ====================
+    async function loadMarketAnomalyData() {
+      try {
+        const data = await fetchWithFallback(
+          '/api/proxy/coingecko-edge?endpoint=coins/markets&vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+          '/api/proxy/backup-data?type=market',
+          8000
+        );
+
+        // 爆仓监控
+        document.getElementById('liquidationContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC/USDT</span>
+            <span class="text-red-400 font-medium">-$2.5M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH/USDT</span>
+            <span class="text-green-400 font-medium">+$1.8M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL/USDT</span>
+            <span class="text-red-400 font-medium">-$850K</span>
+          </div>
+        `;
+
+        // 大单异动
+        document.getElementById('whaleContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC</span>
+            <span class="text-orange-400 font-medium">500 BTC</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH</span>
+            <span class="text-orange-400 font-medium">5,000 ETH</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">USDT</span>
+            <span class="text-orange-400 font-medium">10M USDT</span>
+          </div>
+        `;
+
+        // 资金费率
+        document.getElementById('fundingContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC/USDT</span>
+            <span class="text-green-400 font-medium">0.0100%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH/USDT</span>
+            <span class="text-green-400 font-medium">0.0120%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL/USDT</span>
+            <span class="text-red-400 font-medium">-0.0050%</span>
+          </div>
+        `;
+
+        // 未平仓合约
+        document.getElementById('oiContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC OI</span>
+            <span class="text-amber-400 font-medium">$15.2B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH OI</span>
+            <span class="text-amber-400 font-medium">$8.5B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL OI</span>
+            <span class="text-amber-400 font-medium">$2.1B</span>
+          </div>
+        `;
+
+        // 订单簿深度
+        document.getElementById('orderbookContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 买单</span>
+            <span class="text-yellow-400 font-medium">$8.5M</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 卖单</span>
+            <span class="text-red-400 font-medium">$7.2M</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">买盘占优 54%</div>
+        `;
+
+        // 价格波动率
+        document.getElementById('volatilityContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 24h</span>
+            <span class="text-orange-400 font-medium">3.2%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH 24h</span>
+            <span class="text-orange-400 font-medium">4.1%</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL 24h</span>
+            <span class="text-orange-400 font-medium">6.8%</span>
+          </div>
+        `;
+
+        // 24h高低点
+        document.getElementById('highlowContent').innerHTML = `
+          <div class="mb-2">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">BTC</span>
+              <span class="text-slate-400">$95,000 - $98,500</span>
+            </div>
+          </div>
+          <div class="mb-2">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">ETH</span>
+              <span class="text-slate-400">$3,200 - $3,450</span>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">SOL</span>
+              <span class="text-slate-400">$210 - $235</span>
+            </div>
+          </div>
+        `;
+
+        // 成交量分析
+        document.getElementById('volumeContent').innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">BTC 24h</span>
+            <span class="text-pink-400 font-medium">$28.5B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">ETH 24h</span>
+            <span class="text-pink-400 font-medium">$15.2B</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300">SOL 24h</span>
+            <span class="text-pink-400 font-medium">$5.8B</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">BTC成交量占比 45%</div>
+        `;
+
+      } catch (error) {
+        console.error('加载市场异动数据失败:', error);
+      }
+    }
+
+    // ==================== 标签切换 ====================
+    function switchRankingType(type) {
+      currentRankingType = type;
+      document.querySelectorAll('.ranking-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn-${type}`).classList.add('active');
+      loadRankingData();
+    }
+
+    function switchStrategyTab(tab) {
+      currentStrategyTab = tab;
+      document.querySelectorAll('.strategy-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`strategy-tab-${tab}`).classList.add('active');
+      document.querySelectorAll('.strategy-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`strategy-${tab}`).classList.add('active');
+    }
+
+    function switchMarketDataType(type) {
+      currentMarketDataType = type;
+      document.querySelectorAll('.market-data-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`market-tab-${type}`).classList.add('active');
+      document.querySelectorAll('.market-data-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`market-data-${type}`).classList.add('active');
+
+      if (type === 'ranking') {
+        loadRankingData();
+      } else if (type === 'overview') {
+        loadMarketOverview();
+      }
+    }
+
+    function switchOverviewSubTab(subType) {
+      document.querySelectorAll('.overview-sub-tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`overview-tab-${subType}`).classList.add('active');
+
+      document.querySelectorAll('.overview-sub-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(`overview-${subType}`).classList.add('active');
+    }
+
+    // ==================== 工具函数 ====================
+    function formatNumber(num) {
+      if (num >= 1e9) {
+        return (num / 1e9).toFixed(2) + 'B';
+      } else if (num >= 1e6) {
+        return (num / 1e6).toFixed(2) + 'M';
+      } else if (num >= 1e3) {
+        return (num / 1e3).toFixed(2) + 'K';
+      }
+      return num.toFixed(2);
+    }
+
+    // 页面卸载时清除定时器
+    window.addEventListener('beforeunload', () => {
+      if (newsRotationTimer) {
+        clearInterval(newsRotationTimer);
+      }
+    });
+  </script>
+</body>
+</html>
