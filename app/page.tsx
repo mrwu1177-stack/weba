@@ -1,9 +1,9 @@
 'use client';
 
-import { useMarkets, useLiquidations, useStrategySignals, useNews } from '@/app/lib/hooks/useApi';
-import { CardSkeleton } from '@/app/components/ui/skeleton';
-import { formatCurrency, formatPercentage, getColorForChange, formatNumber } from '@/app/lib/utils';
-import type { Market, StrategySignal, News } from '@/app/lib/types';
+import { useMarkets, useLiquidations, useStrategySignals, useNews } from '@/lib/hooks/useApi';
+import { CardSkeleton } from '@/components/ui/skeleton';
+import { formatCurrency, formatPercentage, getColorForChange, formatNumber } from '@/lib/utils';
+import type { Market, StrategySignal, News } from '@/lib/types';
 
 export default function HomePage() {
   const { data: markets, isLoading: marketsLoading } = useMarkets({ per_page: 20, order: 'market_cap_desc' });

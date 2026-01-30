@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useApiStatus } from '@/app/lib/hooks/useApi';
-import { api } from '@/app/lib/api';
-import { CardSkeleton } from '@/app/components/ui/skeleton';
-import { formatNumber } from '@/app/lib/utils';
+import { useApiStatus } from '@/lib/hooks/useApi';
+import { api } from '@/lib/api';
+import { CardSkeleton } from '@/components/ui/skeleton';
+import { formatNumber } from '@/lib/utils';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

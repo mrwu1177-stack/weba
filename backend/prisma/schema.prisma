@@ -1,0 +1,279 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Market Data Models
+// ============================================
+
+model Market {
+  id          String   @id @default(cuid())
+  coinId      String   @unique // coingecko coin id
+  symbol      String
+  name        String
+  currentPrice Float
+  priceChange24h Float
+  priceChangePercentage24h Float
+  marketCap   Float
+  marketCapRank Int
+  volume24h   Float
+  high24h     Float
+  low24h      Float
+  circulatingSupply Float?
+  totalSupply Float?
+  maxSupply   Float?
+  lastUpdated DateTime @updatedAt
+  
+  // Relations
+  liquidations Liquidation[]
+  
+  @@index([coinId])
+  @@index([symbol])
+  @@index([marketCapRank])
+}
+
+model MarketHistory {
+  id          String   @id @default(cuid())
+  coinId      String
+  price       Float
+  marketCap   Float
+  volume24h   Float
+  timestamp   DateTime
+  
+  @@unique([coinId, timestamp])
+  @@index([coinId])
+  @@index([timestamp])
+}
+
+// ============================================
+// Liquidation Data Models
+// ============================================
+
+model Liquidation {
+  id          String   @id @default(cuid())
+  coinId      String
+  coinSymbol  String
+  side        String   // "long" or "short"
+  amount      Float
+  price       Float
+  leverage    Int?
+  timestamp   DateTime
+  
+  // Relations
+  market      Market?  @relation(fields: [coinId], references: [coinId])
+  
+  @@index([coinId])
+  @@index([timestamp])
+  @@index([side])
+}
+
+model LiquidationChart {
+  id          String   @id @default(cuid())
+  coinSymbol  String
+  price       Float
+  longAmount  Float
+  shortAmount Float
+  totalAmount Float
+  timestamp   DateTime
+  
+  @@unique([coinSymbol, price])
+  @@index([coinSymbol])
+  @@index([timestamp])
+}
+
+// ============================================
+// Strategy Signal Models
+// ============================================
+
+model StrategySignal {
+  id          String   @id @default(cuid())
+  coinId      String
+  coinSymbol  String
+  signalType  String   // "buy" or "sell"
+  signalName  String   // "momentum", "bollinger_bands", "volume_spike", etc.
+  strength    Float    // 0-100
+  reason      String
+  confidence  Float    // 0-100
+  triggerPrice Float?
+  timestamp   DateTime
+  
+  @@index([coinId])
+  @@index([signalType])
+  @@index([timestamp])
+  @@index([signalName])
+}
+
+model BollingerBands {
+  id          String   @id @default(cuid())
+  coinId      String
+  coinSymbol  String
+  upperBand   Float
+  middleBand  Float
+  lowerBand   Float
+  currentPrice Float
+  bandwidth   Float    // (upper - lower) / middle
+  timestamp   DateTime
+  
+  @@unique([coinId, timestamp])
+  @@index([coinId])
+  @@index([timestamp])
+}
+
+model MultiCoinStrategy {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  coins       String[] // array of coin symbols
+  parameters  Json     // strategy parameters
+  performance  Json     // {total_return: 0.5, max_drawdown: -0.1, sharpe_ratio: 1.5}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([isActive])
+}
+
+// ============================================
+// News and Anomaly Models
+// ============================================
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  source      String   // "coindesk", "cointelegraph", etc.
+  imageUrl    String?
+  publishedAt DateTime
+  coins       String[] // related coin symbols
+  
+  @@index([publishedAt])
+  @@index([source])
+}
+
+model MarketAnomaly {
+  id          String   @id @default(cuid())
+  coinId      String
+  coinSymbol  String
+  type        String   // "volume_spike", "price_pump", "liquidation_spike", etc.
+  severity    String   // "low", "medium", "high"
+  description String
+  metadata    Json     // additional data
+  timestamp   DateTime
+  
+  @@index([coinId])
+  @@index([type])
+  @@index([timestamp])
+  @@index([severity])
+}
+
+// ============================================
+// User and Preferences Models
+// ============================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?
+  name          String?
+  avatar        String?
+  role          String   @default("user") // "user" or "admin"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  preferences   UserPreference?
+  watchlist     WatchlistItem[]
+  alerts        Alert[]
+  
+  @@index([email])
+}
+
+model UserPreference {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  theme       String   @default("dark") // "dark" or "light"
+  layout      Json     // widget layout configuration
+  currency    String   @default("usd")
+  language    String   @default("en")
+  autoRefresh Int      @default(30000) // ms
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([userId])
+}
+
+model WatchlistItem {
+  id          String   @id @default(cuid())
+  userId      String
+  coinId      String
+  coinSymbol  String
+  order       Int      // display order
+  createdAt   DateTime @default(now())
+  
+  @@unique([userId, coinId])
+  @@index([userId])
+}
+
+model Alert {
+  id          String   @id @default(cuid())
+  userId      String
+  coinId      String
+  coinSymbol  String
+  type        String   // "price_above", "price_below", "volume_spike", etc.
+  threshold   Float
+  isActive    Boolean  @default(true)
+  triggeredAt DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([isActive])
+  @@index([coinId])
+}
+
+// ============================================
+// System and Cache Models
+// ============================================
+
+model ApiStatus {
+  id          String   @id @default(cuid())
+  apiName     String   @unique
+  status      String   // "healthy", "degraded", "down"
+  latency     Int      // milliseconds
+  lastChecked DateTime @updatedAt
+  errorMessage String?
+  
+  @@index([status])
+}
+
+model DataCache {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  
+  @@index([key])
+  @@index([expiresAt])
+}
+
+model SystemLog {
+  id          String   @id @default(cuid())
+  level       String   // "info", "warn", "error"
+  module      String
+  message     String
+  metadata    Json?
+  timestamp   DateTime @default(now())
+  
+  @@index([level])
+  @@index([module])
+  @@index([timestamp])
+}

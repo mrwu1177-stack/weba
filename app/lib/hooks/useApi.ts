@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/app/lib/api';
-import type { Market } from '@/app/lib/types';
+import { api } from '@/lib/api';
+import type { Market } from '@/lib/types';
 
 export function useMarkets(params?: {
   vs_currency?: string;

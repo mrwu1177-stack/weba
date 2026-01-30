@@ -1,0 +1,16 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "always"
+
+[[services]]
+  http_port = 3001
+
+[variables]
+NODE_ENV = "production"
+PORT = "3001"
+LOG_LEVEL = "info"
