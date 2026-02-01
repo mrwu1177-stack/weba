@@ -1,14 +1,15 @@
 'use client';
 
-import { useMarkets, useLiquidations, useStrategySignals, useNews } from '@/lib/hooks/useApi';
+import { useMarkets, useLiquidations, useStrategySignals, useNews, useAnomalies } from '@/lib/hooks/useApi';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { formatCurrency, formatPercentage, getColorForChange, formatNumber } from '@/lib/utils';
-import type { Market, StrategySignal, News } from '@/lib/types';
+import type { Market, StrategySignal, News, MarketAnomaly } from '@/lib/types';
 
 export default function HomePage() {
   const { data: markets, isLoading: marketsLoading } = useMarkets({ per_page: 20, order: 'market_cap_desc' });
   const { data: liquidations, isLoading: liquidationsLoading } = useLiquidations({ limit: 10 });
   const { data: signals, isLoading: signalsLoading } = useStrategySignals({ limit: 5 });
+  const { data: anomalies, isLoading: anomaliesLoading } = useAnomalies({ limit: 5 });
   const { data: news, isLoading: newsLoading } = useNews({ limit: 5 });
 
   return (
@@ -70,6 +71,12 @@ export default function HomePage() {
             </div>
           </div>
           <div className="rounded-lg border border-gray-800 bg-gray-900/50 p-4">
+            <div className="text-sm text-gray-400 mb-1">Market Anomalies</div>
+            <div className="text-xl font-semibold">
+              {anomalies?.length || 0}
+            </div>
+          </div>
+          <div className="rounded-lg border border-gray-800 bg-gray-900/50 p-4">
             <div className="text-sm text-gray-400 mb-1">Recent Liquidations</div>
             <div className="text-xl font-semibold">
               {liquidations?.length || 0}
@@ -119,8 +126,46 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Signals Section */}
+          {/* Signals & Anomalies Section */}
           <div>
+            {/* Anomalies Section */}
+            <div className="rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden mb-6">
+              <div className="border-b border-gray-800 px-4 py-3">
+                <h2 className="text-lg font-semibold">Market Anomalies</h2>
+              </div>
+              <div className="divide-y divide-gray-800">
+                {anomaliesLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="p-4">
+                      <CardSkeleton />
+                    </div>
+                  ))
+                ) : anomalies && anomalies.length > 0 ? (
+                  anomalies?.slice(0, 5).map((anomaly: MarketAnomaly) => (
+                    <div key={anomaly.id} className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium uppercase">{anomaly.coinSymbol}</span>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          anomaly.severity === 'high'
+                            ? 'bg-red-500/10 text-red-500'
+                            : anomaly.severity === 'medium'
+                            ? 'bg-yellow-500/10 text-yellow-500'
+                            : 'bg-blue-500/10 text-blue-500'
+                        }`}>
+                          {anomaly.severity.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-400 mb-2">{anomaly.type}</div>
+                      <div className="text-sm text-gray-500">{anomaly.description}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-gray-400">No anomalies detected</div>
+                )}
+              </div>
+            </div>
+
+            {/* Signals Section */}
             <div className="rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden">
               <div className="border-b border-gray-800 px-4 py-3">
                 <h2 className="text-lg font-semibold">Latest Signals</h2>
