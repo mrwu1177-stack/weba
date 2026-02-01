@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies (production-like, omit dev)
+RUN npm ci --omit=dev
 
 # Expose port
 EXPOSE 3000
