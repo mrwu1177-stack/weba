@@ -1,9 +1,6 @@
 [build]
-builder = "NIXPACKS"
-
-[build.config]
-runtimeVersion = "18.20.5"
-packageManager = "npm"
+builder = "DOCKER"
+dockerfile = "Dockerfile.railway"
 
 [deploy]
 startCommand = "npm start"
