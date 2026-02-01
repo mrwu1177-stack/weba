@@ -1,5 +1,5 @@
-# Railway Production Dockerfile
-# Optimized for Railway deployment with Next.js
+# Dockerfile for HelloYan - Next.js Application
+# Multi-stage build for optimal production deployment
 
 FROM node:18-alpine AS dependencies
 WORKDIR /app
@@ -15,35 +15,28 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine
+FROM node:18-alpine AS runtime
 WORKDIR /app
 
 # Install dumb-init for signal handling
-RUN apk add --no-cache dumb-init curl
+RUN apk add --no-cache dumb-init
 
-# Copy package files
 COPY package*.json ./
 COPY .npmrc ./
-
-# Install production dependencies only
 RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Copy built application from builder
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/tsconfig.json ./ 2>/dev/null || true
-COPY --from=builder /app/tailwind.config.js ./ 2>/dev/null || true
-COPY --from=builder /app/postcss.config.js ./ 2>/dev/null || true
+COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=builder /app/tsconfig.json ./tsconfig.json 2>/dev/null || true
+COPY --from=builder /app/tailwind.config.js ./tailwind.config.js 2>/dev/null || true
+COPY --from=builder /app/postcss.config.js ./postcss.config.js 2>/dev/null || true
 
-# Create non-root user for security
+# Non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 USER nextjs
-# Expose port
+
 EXPOSE 3000
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start application
 CMD ["npm", "start"]

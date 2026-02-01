@@ -4,5 +4,12 @@ dockerfile = "Dockerfile.railway"
 
 [deploy]
 startCommand = "npm start"
-health_checks.enabled = true
-health_checks.cpu = {memory = "128m", cpu = "10m"}
+
+[deploy.healthChecks]
+enabled = true
+cpu = "10m"
+memory = "128m"
+interval = 30
+timeout = 3
+startPeriod = 40
+retries = 3
