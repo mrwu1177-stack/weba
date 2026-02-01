@@ -2,7 +2,7 @@
 # Optimized for Fastify backend deployment
 
 # Stage 1: Build
-FROM node:18-alpine as builder
+FROM node:24-alpine as builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN npm run build
 RUN npx prisma generate
 
 # Stage 2: Runtime
-FROM node:18-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 

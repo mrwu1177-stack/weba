@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import { fastify } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import websocket from '@fastify/websocket';
@@ -19,7 +19,7 @@ const logger = createLogger();
 const prisma = new PrismaClient();
 
 // Initialize Fastify server
-const fastify = Fastify({
+const fastify = fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
     transport: {
