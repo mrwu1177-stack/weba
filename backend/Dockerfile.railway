@@ -12,7 +12,7 @@ COPY .npmrc ./
 COPY tsconfig.json ./
 
 # Install all dependencies for build
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY src ./src
@@ -37,7 +37,7 @@ COPY package*.json ./
 COPY .npmrc ./
 
 # Install production dependencies only
-RUN npm ci --omit=dev && \
+RUN npm install --production && \
     npm cache clean --force
 
 # Copy built application from builder

@@ -5,7 +5,7 @@ FROM node:24-alpine AS dependencies
 WORKDIR /app
 COPY package*.json ./
 COPY .npmrc ./
-RUN npm ci
+RUN npm install
 
 FROM node:24-alpine AS builder
 WORKDIR /app
