@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApiStatus } from '@/lib/hooks/useApi';
 import { api } from '@/lib/api';
 import { CardSkeleton } from '@/components/ui/skeleton';
