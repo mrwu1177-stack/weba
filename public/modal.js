@@ -552,7 +552,7 @@ function generateHighLowContent(data) {
             <td class="text-slate-300">${item.position}</td>
             <td style="width: 150px;">
               <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-red-500 to-green-500" style="width: ${item.position}"></div>
+                <div class="h-full bg-gradient-to-r from-orange-500 to-green-500" style="width: ${item.position}"></div>
               </div>
             </td>
           </tr>

@@ -517,14 +517,14 @@
 
     /* 10x 杠杆颜色 */
     .leverage-btn[data-leverage="10x"].active {
-      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
     }
 
     /* 25x 杠杆颜色 */
     .leverage-btn[data-leverage="25x"].active {
-      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
-      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
     }
 
     /* 50x 杠杆颜色 */
@@ -535,8 +535,8 @@
 
     /* 100x 杠杆颜色 */
     .leverage-btn[data-leverage="100x"].active {
-      background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+      background: linear-gradient(135deg, #fb923c 0%, #f59e0b 100%);
+      box-shadow: 0 4px 15px rgba(251, 146, 60, 0.3);
     }
 
     /* 所有 杠杆颜色 */
@@ -983,7 +983,7 @@
             <span class="text-slate-400">多单持仓</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-sm bg-gradient-to-t from-red-500 to-red-400"></span>
+            <span class="w-3 h-3 rounded-sm bg-gradient-to-t from-orange-500 to-orange-400"></span>
             <span class="text-slate-400">空单持仓</span>
           </div>
         </div>
@@ -1022,10 +1022,10 @@
 
     // 杠杆颜色配置
     const leverageColors = {
-      '10x': { primary: '#3b82f6', gradient: ['#3b82f6', '#60a5fa'] },
-      '25x': { primary: '#8b5cf6', gradient: ['#8b5cf6', '#a78bfa'] },
+      '10x': { primary: '#06b6d4', gradient: ['#06b6d4', '#14b8a6'] },
+      '25x': { primary: '#06b6d4', gradient: ['#06b6d4', '#14b8a6'] },
       '50x': { primary: '#f59e0b', gradient: ['#f59e0b', '#fbbf24'] },
-      '100x': { primary: '#ef4444', gradient: ['#ef4444', '#f87171'] }
+      '100x': { primary: '#fb923c', gradient: ['#fb923c', '#f59e0b'] }
     };
 
     // ==================== 初始化 ====================
@@ -2273,7 +2273,7 @@
             <p class="text-6xl font-bold ${colorClass} mb-2">${fearGreedValue}</p>
             <p class="text-sm ${colorClass} font-medium">${label}</p>
             <div class="mt-4 h-3 bg-slate-700 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500" style="width: ${fearGreedValue}%"></div>
+              <div class="h-full bg-gradient-to-r from-orange-500 via-yellow-500 to-green-500" style="width: ${fearGreedValue}%"></div>
             </div>
             <div class="flex justify-between mt-1 text-xs text-slate-500">
               <span>0</span>

@@ -147,10 +147,10 @@ export default function HomePage() {
                         <span className="font-medium uppercase">{anomaly.coinSymbol}</span>
                         <span className={`text-xs px-2 py-1 rounded ${
                           anomaly.severity === 'high'
-                            ? 'bg-red-500/10 text-red-500'
+                            ? 'bg-orange-500/10 text-orange-500'
                             : anomaly.severity === 'medium'
                             ? 'bg-yellow-500/10 text-yellow-500'
-                            : 'bg-blue-500/10 text-blue-500'
+                            : 'bg-cyan-500/10 text-cyan-500'
                         }`}>
                           {anomaly.severity.toUpperCase()}
                         </span>
@@ -185,7 +185,7 @@ export default function HomePage() {
                         <span className={`text-xs px-2 py-1 rounded ${
                           signal.signalType === 'buy' 
                             ? 'bg-green-500/10 text-green-500' 
-                            : 'bg-red-500/10 text-red-500'
+                            : 'bg-orange-500/10 text-orange-500'
                         }`}>
                           {signal.signalType.toUpperCase()}
                         </span>
