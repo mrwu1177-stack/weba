@@ -1,8 +1,11 @@
 [build]
 builder = "NIXPACKS"
 
-[build.env]
-NPM_CONFIG_OMIT = "dev"
+[build.config]
+runtimeVersion = "18.20.5"
+packageManager = "npm"
 
 [deploy]
 startCommand = "npm start"
+health_checks.enabled = true
+health_checks.cpu = {memory = "128m", cpu = "10m"}

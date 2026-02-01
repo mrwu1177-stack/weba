@@ -31,26 +31,30 @@ OKX_API_SECRET=your_okx_api_secret
 
 ## 🚀 Railway 配置步骤
 
-1. **创建 PostgreSQL 和 Redis 插件**
-   - 在 Railway 控制面板添加 PostgreSQL 数据库
-   - 添加 Redis 缓存服务
-   - 复制自动生成的 `DATABASE_URL` 和 `REDIS_URL`
+### 方案 A: 使用 Nixpacks（推荐）
 
-2. **配置前端服务**
-   - 部署分支：`main`
-   - 环境变量：参考上面的前端环境变量
-   - 构建命令：`npm run build`
-   - 启动命令：`npm start`
+1. **在 Railway 项目设置中**
+   - 构建器：选择 `NIXPACKS`（默认）
+   - 不需要修改其他配置
+   - `.npmrc` 文件会自动被读取，`omit=dev` 会生效
 
-3. **配置后端服务**
-   - 部署分支：`main`
-   - 环境变量：参考上面的后端环境变量
-   - 构建命令：`npm run build`
-   - 启动命令：`npm start`
+2. **如果仍出现 npm 错误**
+   - 在 Railway 项目中删除旧的构建缓存
+   - 强制重新构建：点击"Trigger Deploy"
 
-4. **配置域名 (可选)**
-   - 在 Railway 项目中生成公共域名
-   - 更新前端的 `NEXT_PUBLIC_API_BASE_URL` 为后端的 Railway URL
+### 方案 B: 使用自定义 Dockerfile（如果 Nixpacks 失败）
+
+1. **前端服务**
+   - 在 Railway 项目设置中：
+     - Dockerfile 路径：`Dockerfile.railway`
+     - 构建命令：留空（使用 Dockerfile 中的命令）
+     - 启动命令：`npm start`
+
+2. **后端服务**
+   - 在 Railway 项目设置中：
+     - Dockerfile 路径：`backend/Dockerfile.railway`
+     - 构建命令：留空（使用 Dockerfile 中的命令）
+     - 启动命令：`npm start`
 
 ## 🔐 安全建议
 
@@ -73,19 +77,24 @@ curl https://your-backend-url/api/v1/health
 
 ## 📝 常见问题
 
-### 1. 前端无法连接后端
-- 检查 `NEXT_PUBLIC_API_BASE_URL` 是否指向正确的后端 URL
-- 确保后端已成功启动
+### 1. npm ci 命令报错 (EUSAGE)
+**症状**: `npm 错误代码 EUSAGE`
 
-### 2. 数据库连接错误
-- 验证 `DATABASE_URL` 格式正确
-- 确保 PostgreSQL 插件已创建
-- 检查网络连接权限
+**原因**: Railway Nixpacks 未正确读取环境变量
 
-### 3. Redis 连接错误
-- 验证 `REDIS_URL` 格式正确
-- 确保 Redis 插件已创建
-- 检查连接超时设置
+**解决方案**:
+- ✅ 确保 `.npmrc` 文件在仓库中（已配置 `omit=dev`）
+- ✅ 删除 Railway 缓存：点击项目设置 → 清除构建缓存
+- ✅ 强制重新构建：点击"Trigger Deploy"
+- ✅ 或使用自定义 Dockerfile 方案（Dockerfile.railway）
+
+### 2. 包版本找不到
+**症状**: `notarget 找不到与 @types/react-grid-layout 匹配的版本`
+
+**解决方案**:
+- 检查 `package.json` 中的版本号
+- 确保版本在 npm 注册表中存在
+- 更新为稳定版本（已修复为 1.3.5）
 
 ## 🔗 相关链接
 
