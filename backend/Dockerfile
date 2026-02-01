@@ -8,7 +8,8 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm ci --only=production
+# Use --omit=dev (替代过时的 --only=production) 以兼容较新 npm 版本
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY . .
