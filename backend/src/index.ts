@@ -1,4 +1,4 @@
-import { fastify } from 'fastify';
+import { fastify, FastifyReply } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import websocket from '@fastify/websocket';
@@ -19,7 +19,7 @@ const logger = createLogger();
 const prisma = new PrismaClient();
 
 // Initialize Fastify server
-const fastify = fastify({
+const server = fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
     transport: {
@@ -36,24 +36,24 @@ const fastify = fastify({
 // Register plugins
 async function setupServer() {
   // CORS
-  await fastify.register(cors, {
+  await server.register(cors, {
     origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
     credentials: true,
   });
 
   // Rate limiting
-  await fastify.register(rateLimit, {
+  await server.register(rateLimit, {
     max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
     timeWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '60000'),
     skipOnError: true,
   });
 
   // WebSocket
-  await fastify.register(websocket);
+  await server.register(websocket);
 
   // Custom middleware
-  fastify.addHook('onRequest', requestIdMiddleware);
-  fastify.setErrorHandler(errorHandler);
+  server.addHook('onRequest', requestIdMiddleware);
+  server.setErrorHandler(errorHandler);
 
   // Initialize Redis
   try {
@@ -74,17 +74,17 @@ async function setupServer() {
   }
 
   // Register routes
-  await registerRoutes(fastify);
+  await registerRoutes(server);
 
   // Initialize WebSocket
-  initWebSocket(fastify);
+  initWebSocket(server);
 
   // Start cron jobs
   startCronJobs();
 }
 
 // Health check endpoint
-fastify.get('/health', async (request, reply) => {
+server.get('/health', async (request, reply) => {
   return {
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -94,7 +94,7 @@ fastify.get('/health', async (request, reply) => {
 });
 
 // API metadata endpoint
-fastify.get('/api/v1/meta', async (request, reply) => {
+server.get('/api/v1/meta', async (request, reply) => {
   return {
     name: 'HelloYan API',
     version: '1.0.0',
@@ -117,7 +117,7 @@ fastify.get('/api/v1/meta', async (request, reply) => {
 async function closeGracefully(signal: string) {
   logger.info(`Received signal to terminate: ${signal}`);
   
-  await fastify.close();
+  await server.close();
   await prisma.$disconnect();
   
   logger.info('Server closed gracefully');
@@ -135,16 +135,16 @@ async function start() {
     const port = parseInt(process.env.PORT || '3001');
     const host = process.env.HOST || '0.0.0.0';
     
-    await fastify.listen({ port, host });
+    await server.listen({ port, host });
     logger.info(`🚀 Server running on http://${host}:${port}`);
     logger.info(`📚 API documentation: http://${host}:${port}/api/v1/meta`);
     logger.info(`💚 Health check: http://${host}:${port}/health`);
   } catch (err) {
-    fastify.log.error(err);
+    server.log.error(err);
     process.exit(1);
   }
 }
 
 start();
 
-export { fastify, prisma };
+export { server, prisma };

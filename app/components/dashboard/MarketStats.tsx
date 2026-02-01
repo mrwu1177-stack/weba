@@ -52,14 +52,14 @@ export function MarketStats() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
         title="总市值"
-        value={`$${(stats?.marketCap || 0) / 1e12}`}
+        value={`${(stats?.marketCap || 0) / 1e12}`}
         unit="T"
         icon="💰"
         trend={2.5}
       />
       <StatCard
         title="24h 成交量"
-        value={`$${(stats?.volume24h || 0) / 1e12}`}
+        value={`${(stats?.volume24h || 0) / 1e12}`}
         unit="T"
         icon="📊"
         trend={-1.2}

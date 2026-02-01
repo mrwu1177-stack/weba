@@ -1,10 +1,12 @@
 'use client';
 
+import { ReactNode } from 'react';
+
 export interface Column<T> {
   key: keyof T;
   label: string;
   width?: string;
-  format?: (value: any) => React.ReactNode;
+  format?: (value: any) => ReactNode;
   align?: 'left' | 'center' | 'right';
 }
 
