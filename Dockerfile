@@ -23,7 +23,7 @@ RUN apk add --no-cache dumb-init
 
 COPY package*.json ./
 COPY .npmrc ./
-RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
