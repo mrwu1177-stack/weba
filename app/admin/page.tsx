@@ -6,12 +6,23 @@ import { api } from '@/lib/api';
 import { CardSkeleton } from '@/components/ui/skeleton';
 import { formatNumber } from '@/lib/utils';
 
+interface ApiStatusItem {
+  apiName: string;
+  status: 'healthy' | 'degraded' | 'down';
+  latency: number;
+  lastChecked: string;
+}
+
+interface ApiResponse {
+  apiStatus: ApiStatusItem[];
+}
+
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('api-status');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'api-status' | 'config'>('api-status');
 
   const { data: apiStatus, isLoading: apiStatusLoading } = useApiStatus();
 
@@ -22,7 +33,7 @@ export default function AdminPage() {
     }
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -145,7 +156,7 @@ export default function AdminPage() {
             ) : (
               <div className="rounded-lg border border-gray-800 bg-gray-900/50 overflow-hidden">
                 <div className="divide-y divide-gray-800">
-                  {apiStatus?.map((api) => (
+                  {(apiStatus as ApiStatusItem[])?.map((api) => (
                     <div
                       key={api.apiName}
                       className="flex items-center justify-between p-4 hover:bg-gray-800/50 transition-colors"
