@@ -23,7 +23,8 @@ RUN apk add --no-cache dumb-init
 
 COPY package*.json ./
 COPY .npmrc ./
-RUN npm install --production && npm cache clean --force
+RUN npm install --production && \
+    npm cache clean --force
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
