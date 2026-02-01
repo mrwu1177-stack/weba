@@ -1,6 +1,7 @@
 [build]
-builder = "DOCKER"
-dockerfile = "Dockerfile.railway"
+builder = "NIXPACKS"
+buildCommand = "npm run build"
+startCommand = "npm start"
 
 [deploy]
 startCommand = "npm start"
